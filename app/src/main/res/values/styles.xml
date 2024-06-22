@@ -1,0 +1,60 @@
+<resources>
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#27374D</item>
+        <item name="colorPrimaryDark">#012741</item>
+        <item name="colorAccent">#4CAF50</item>
+        <item name="android:windowBackground">#333333</item>
+        <item name="android:textColor">#DDE6ED</item>
+    </style>
+
+    <!-- Button Style -->
+    <style name="BaseButton">
+        <item name="android:background">#27374D</item>
+        <item name="android:textColor">#DDE6ED</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!-- Calculator Button Style -->
+    <style name="CalculatorButton" parent="BaseButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_rowWeight">1</item>
+        <item name="android:textSize">48sp</item>
+        <item name="android:background">@drawable/rounded_button</item>
+    </style>
+
+    <!-- Customer Button Style -->
+    <style name="CustomerButton" parent="BaseButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <!-- EditText Style -->
+    <style name="BaseEditText">
+        <item name="android:background">#FFFFFF</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!-- TextView Style -->
+    <style name="BaseTextView">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!-- Custom Colors -->
+    <color name="selectedCustomerButton">#485872</color>
+    <color name="defaultCustomerButton">#012741</color>
+</resources>

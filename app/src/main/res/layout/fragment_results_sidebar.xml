@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#EEEEEE"> <!-- Add a background color to the whole fragment -->
+
+    <TextView
+        android:id="@+id/results_sidebar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Saved Results"
+        android:textColor="#FF000000"
+        android:textSize="24sp"
+        android:layout_marginBottom="8dp" />
+
+    <ListView
+        android:id="@+id/results_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:background="#FFFFFF"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp" /> <!-- Add background and padding to the list -->
+
+</LinearLayout>
