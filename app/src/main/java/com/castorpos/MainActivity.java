@@ -24,6 +24,7 @@ import java.util.List;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import java.text.DecimalFormat;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,11 +38,12 @@ public class MainActivity extends AppCompatActivity {
     private double operand1 = 0;
     private double operand2 = 0;
     private String currentOperation = "";
-    private DecimalFormat df = new DecimalFormat("0.00");
-
+    private DecimalFormat df = new DecimalFormat("$0.00");
     private int numberOfCustomers;
-       private ArrayAdapter<String> resultsAdapter;
+    private ArrayAdapter<String> resultsAdapter;
     private List<String> resultsList;
+    private ServerSidebarFragment serverSidebarFragment;
+    private ResultsSidebarFragment resultsSidebarFragment;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -76,14 +78,23 @@ public class MainActivity extends AppCompatActivity {
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
 
-        // Add ServerSidebarFragment and ResultsSidebarFragment to the MainActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        ServerSidebarFragment serverSidebarFragment = new ServerSidebarFragment();
-        fragmentTransaction.add(R.id.server_sidebar_container, serverSidebarFragment);
-        ResultsSidebarFragment resultsSidebarFragment = new ResultsSidebarFragment();
-        fragmentTransaction.add(R.id.results_sidebar_container, resultsSidebarFragment);
-        fragmentTransaction.commit();
+        serverSidebarFragment = (ServerSidebarFragment) fragmentManager.findFragmentById(R.id.server_sidebar_container);
+        resultsSidebarFragment = (ResultsSidebarFragment) fragmentManager.findFragmentById(R.id.results_sidebar_container);
+
+        if (serverSidebarFragment == null) {
+            serverSidebarFragment = new ServerSidebarFragment();
+            fragmentManager.beginTransaction()
+                    .add(R.id.server_sidebar_container, serverSidebarFragment)
+                    .commit();
+        }
+
+        if (resultsSidebarFragment == null) {
+            resultsSidebarFragment = new ResultsSidebarFragment();
+            fragmentManager.beginTransaction()
+                    .add(R.id.results_sidebar_container, resultsSidebarFragment)
+                    .commit();
+        }
 
         PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
@@ -158,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.buttonSave).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //saveResult();
+                saveResult();
             }
         });
 
@@ -182,8 +193,44 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void saveResult() {
+        String result = display.getText().toString();
+        String server = serverSidebarFragment.getSelectedServer();
+        int customers = serverSidebarFragment.getNumberOfCustomers();
+
+        // Debug statements
+        Log.d("SaveResult", "Result: " + result);
+        Log.d("SaveResult", "Server: " + server);
+        Log.d("SaveResult", "Customers: " + customers);
+
+        if (result.isEmpty() || result.equals("$0.00")) {
+            Toast.makeText(this, "Result is empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (server.isEmpty()) {
+            Toast.makeText(this, "Server is empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (customers == -1) {
+            Toast.makeText(this, "Invalid number of customers", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save the result with server and customers
+        SavedResult savedResult = new SavedResult(result, server, customers);
+        resultsSidebarFragment.addResult(savedResult);
+
+        // Reset the current operand to 0.00
+        operand1 = 0.00;
+        operand2 = 0.00;
+        currentInput.setLength(0); // Clear the current input
+        display.setText(df.format(0.00)); // Update the display to show 0.00
+    }
+
     private void updateDisplay() {
-        String displayValue = "0.00";
+        String displayValue = "$0.00";
         if (currentInput.length() > 0) {
             double input = Double.parseDouble(currentInput.toString()) / 100;
             displayValue = df.format(input);
@@ -242,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
         display.setText("0.00");
         operationDisplay.setText("");
     }
+
 
     private void sendSerialSignal() {
         List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();

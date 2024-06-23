@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -22,6 +23,8 @@ public class ServerSidebarFragment extends Fragment {
     private ListView serverListView;
     private ServerAdapter serverAdapter;
     private ArrayList<String> serverList;
+    private int selectedServerPosition = -1; // No server selected by default
+    private EditText customersInput;
 
     @Nullable
     @Override
@@ -31,24 +34,42 @@ public class ServerSidebarFragment extends Fragment {
         serverNameInput = view.findViewById(R.id.server_name_input);
         addServerButton = view.findViewById(R.id.add_server_button);
         serverListView = view.findViewById(R.id.server_list_view);
+        customersInput = view.findViewById(R.id.customers_input);
 
-        // Initialize the server list with the default "To-Go" server
+        Button c1 = view.findViewById(R.id.c1);
+        Button c2 = view.findViewById(R.id.c2);
+        Button c3 = view.findViewById(R.id.c3);
+        Button c4 = view.findViewById(R.id.c4);
+
+        c1.setOnClickListener(v -> customersInput.setText("1"));
+        c2.setOnClickListener(v -> customersInput.setText("2"));
+        c3.setOnClickListener(v -> customersInput.setText("3"));
+        c4.setOnClickListener(v -> customersInput.setText("4"));
+
+        // Initialize the server list and adapter
         serverList = new ArrayList<>();
         serverList.add("To-Go");
         serverAdapter = new ServerAdapter(requireContext(), serverList);
         serverListView.setAdapter(serverAdapter);
 
-        addServerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String serverName = serverNameInput.getText().toString().trim();
-                if (!serverName.isEmpty()) {
-                    addServer(serverName);
+        addServerButton.setOnClickListener(v -> {
+            String serverName = serverNameInput.getText().toString().trim();
+            if (!serverName.isEmpty()) {
+                if (!serverList.contains(serverName)) {
+                    serverList.add(serverName);
+                    serverAdapter.notifyDataSetChanged();
                     serverNameInput.setText("");
                 } else {
-                    Toast.makeText(requireContext(), "Please enter a server name", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Server already exists", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                Toast.makeText(getContext(), "Server name cannot be empty", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        serverListView.setOnItemClickListener((parent, view1, position, id) -> {
+            selectedServerPosition = position;
+            serverAdapter.notifyDataSetChanged();
         });
 
         return view;
@@ -66,5 +87,26 @@ public class ServerSidebarFragment extends Fragment {
             serverList.remove(position);
             serverAdapter.notifyDataSetChanged();
         }
+    }
+
+    public int getNumberOfCustomers() {
+        String input = customersInput.getText().toString().trim();
+        if (input.isEmpty()) {
+            return -1; // or any default value indicating no input
+        } else {
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid number of customers", Toast.LENGTH_SHORT).show();
+                return -1;
+            }
+        }
+    }
+
+    public String getSelectedServer() {
+        if (selectedServerPosition >= 0 && selectedServerPosition < serverList.size()) {
+            return serverList.get(selectedServerPosition);
+        }
+        return "";
     }
 }
