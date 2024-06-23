@@ -26,11 +26,12 @@ public class ResultsAdapter extends ArrayAdapter<SavedResult> {
         }
 
         TextView resultTextView = convertView.findViewById(R.id.saved_result);
-        // TextView serverTextView = convertView.findViewById(R.id.saved_server);
+        TextView serverTextView = convertView.findViewById(R.id.saved_server);
         TextView customersTextView = convertView.findViewById(R.id.saved_customers);
         Button deleteButton = convertView.findViewById(R.id.delete_result_button);
 
-        resultTextView.setText(result.getResult() + ", Server: " + result.getServer());
+        resultTextView.setText(result.getResult());
+        serverTextView.setText(result.getServer());
         customersTextView.setText(result.getCustomers() + " customer(s)");
 
         deleteButton.setOnClickListener(v -> {

@@ -40,6 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:hint="Enter server name"
+            android:inputType="textCapWords"
             android:minHeight="48dp"
             android:textColorHint="#A1887F" />
 

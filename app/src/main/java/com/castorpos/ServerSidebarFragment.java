@@ -1,13 +1,19 @@
 package com.castorpos;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +31,23 @@ public class ServerSidebarFragment extends Fragment {
     private ArrayList<String> serverList;
     private int selectedServerPosition = -1; // No server selected by default
     private EditText customersInput;
+    private ServerSelectionListener listener;
+    private TextView serverTextView;
+    private String selectedServer;
+
+    public void updateDisplay() {
+        if (serverTextView != null && selectedServer != null) {
+            serverTextView.setText("Selected Server: " + selectedServer);
+        }
+    }
+
+    public interface ServerSelectionListener {
+        void onServerSelected(String server);
+    }
+
+    public void setServerSelectionListener(ServerSelectionListener listener) {
+        this.listener = listener;
+    }
 
     @Nullable
     @Override
@@ -52,27 +75,48 @@ public class ServerSidebarFragment extends Fragment {
         serverAdapter = new ServerAdapter(requireContext(), serverList);
         serverListView.setAdapter(serverAdapter);
 
-        addServerButton.setOnClickListener(v -> {
-            String serverName = serverNameInput.getText().toString().trim();
-            if (!serverName.isEmpty()) {
-                if (!serverList.contains(serverName)) {
-                    serverList.add(serverName);
-                    serverAdapter.notifyDataSetChanged();
-                    serverNameInput.setText("");
-                } else {
-                    Toast.makeText(getContext(), "Server already exists", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getContext(), "Server name cannot be empty", Toast.LENGTH_SHORT).show();
+        addServerButton.setOnClickListener(v -> addServer());
+
+        serverNameInput.setOnEditorActionListener((TextView v, int actionId, KeyEvent event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                    actionId == EditorInfo.IME_ACTION_NEXT ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+
+                addServer();
+                return true;
             }
+            return false;
         });
 
         serverListView.setOnItemClickListener((parent, view1, position, id) -> {
             selectedServerPosition = position;
-            serverAdapter.notifyDataSetChanged();
+            serverAdapter.setSelectedPosition(position);
+            Log.d("ServerSidebarFragment", "Server selected: " + serverList.get(position));
         });
 
         return view;
+    }
+
+    private void addServer() {
+        String serverName = serverNameInput.getText().toString().trim();
+        if (!serverName.isEmpty()) {
+            if (!serverList.contains(serverName)) {
+                serverList.add(serverName);
+                serverAdapter.notifyDataSetChanged();
+                serverNameInput.setText("");
+
+                // Hide the keyboard
+                InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(serverNameInput.getWindowToken(), 0);
+                }
+
+            } else {
+                Toast.makeText(getContext(), "Server already exists", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(getContext(), "Server name cannot be empty", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Method to add a server to the list
@@ -108,5 +152,9 @@ public class ServerSidebarFragment extends Fragment {
             return serverList.get(selectedServerPosition);
         }
         return "";
+    }
+
+    public int getSelectedServerPosition() {
+        return selectedServerPosition;
     }
 }
