@@ -15,8 +15,8 @@
         android:textColor="#FF000000"
         android:textSize="24sp" />
 
-    <ListView
-        android:id="@+id/server_list_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/server_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -35,20 +35,22 @@
         android:layout_marginBottom="8dp">
 
         <EditText
-            android:id="@+id/server_name_input"
+            android:id="@+id/server_name_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:hint="Enter server name"
+            android:inputType="textCapWords"
             android:minHeight="48dp"
             android:textColorHint="#A1887F" />
 
         <Button
-            android:id="@+id/add_server_button"
+            android:id="@+id/add_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/add_server"
+            android:text="Add Server"
             android:backgroundTint="#012741"/>
+
     </LinearLayout>
 
     <!-- New Section for Number of Customers -->

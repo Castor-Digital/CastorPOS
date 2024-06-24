@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp"
+    android:padding="4dp"
     android:background="#FFFFFF">
 
     <LinearLayout
@@ -39,7 +39,7 @@
         android:id="@+id/delete_result_button"
         style="@style/BaseButton"
         android:text="⌧"
-        android:textSize="24sp"
+        android:textSize="48sp"
         android:textColor="#FF0000"
         android:background="#00FFFFFF"
         android:layout_gravity="center_vertical" />

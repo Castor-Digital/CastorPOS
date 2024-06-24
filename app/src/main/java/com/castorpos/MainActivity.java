@@ -27,6 +27,9 @@ import java.text.DecimalFormat;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    private ResultsSidebarFragment resultsSidebarFragment;
+    private ServerSidebarFragment serverSidebarFragment;
+    private List<SavedResult> savedResults = new ArrayList<>();
 
     private static final String TAG = "MainActivity";
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
@@ -39,11 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private double operand2 = 0;
     private String currentOperation = "";
     private DecimalFormat df = new DecimalFormat("$0.00");
-    private int numberOfCustomers;
-    private ArrayAdapter<String> resultsAdapter;
-    private List<String> resultsList;
-    private ServerSidebarFragment serverSidebarFragment;
-    private ResultsSidebarFragment resultsSidebarFragment;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -78,25 +76,19 @@ public class MainActivity extends AppCompatActivity {
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
 
+        // Initialize fragments
+        resultsSidebarFragment = ResultsSidebarFragment.newInstance(savedResults);
+        serverSidebarFragment = new ServerSidebarFragment();
+
+        // Add the ServerSidebarFragment to the layout
+        serverSidebarFragment = new ServerSidebarFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
-        serverSidebarFragment = (ServerSidebarFragment) fragmentManager.findFragmentById(R.id.server_sidebar_container);
-        resultsSidebarFragment = (ResultsSidebarFragment) fragmentManager.findFragmentById(R.id.results_sidebar_container);
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.server_sidebar_container, serverSidebarFragment);
+        fragmentTransaction.replace(R.id.results_sidebar_container, resultsSidebarFragment);
+        fragmentTransaction.commit();
 
-        if (serverSidebarFragment == null) {
-            serverSidebarFragment = new ServerSidebarFragment();
-            fragmentManager.beginTransaction()
-                    .add(R.id.server_sidebar_container, serverSidebarFragment)
-                    .commit();
-        }
-
-        if (resultsSidebarFragment == null) {
-            resultsSidebarFragment = new ResultsSidebarFragment();
-            fragmentManager.beginTransaction()
-                    .add(R.id.results_sidebar_container, resultsSidebarFragment)
-                    .commit();
-        }
-
-        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
@@ -169,7 +161,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.buttonSave).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveResult();
+                String resultText = display.getText().toString(); // Get the result text from your display or relevant source
+                saveResult(resultText);
             }
         });
 
@@ -193,34 +186,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void saveResult() {
-        String result = display.getText().toString();
-        String server = serverSidebarFragment.getSelectedServer();
-        int customers = serverSidebarFragment.getNumberOfCustomers();
-
-        // Debug statements
-        Log.d("SaveResult", "Result: " + result);
-        Log.d("SaveResult", "Server: " + server);
-        Log.d("SaveResult", "Customers: " + customers);
-
-        if (result.isEmpty() || result.equals("$0.00")) {
-            Toast.makeText(this, "Result is empty", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (server.isEmpty()) {
-            Toast.makeText(this, "Server is empty", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (customers == -1) {
-            Toast.makeText(this, "Invalid number of customers", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Save the result with server and customers
-        SavedResult savedResult = new SavedResult(result, server, customers);
+    private void saveResult(String resultText) {
+        String serverName = serverSidebarFragment.getSelectedServer();
+        int customers = serverSidebarFragment.getNumberOfCustomers();  // Ensure this method exists in ServerSidebarFragment
+        SavedResult savedResult = new SavedResult(resultText, serverName, customers);  // Assuming customers field exists
         resultsSidebarFragment.addResult(savedResult);
+
 
         // Reset the current operand to 0.00
         operand1 = 0.00;
@@ -288,6 +259,14 @@ public class MainActivity extends AppCompatActivity {
         currentOperation = "";
         display.setText("0.00");
         operationDisplay.setText("");
+    }
+
+    public void onServerSelected(String serverName) {
+        showSelectedServer(serverName);
+    }
+
+    private void showSelectedServer(String serverName) {
+        Toast.makeText(this, "Selected Server: " + serverName, Toast.LENGTH_SHORT).show();
     }
 
 
