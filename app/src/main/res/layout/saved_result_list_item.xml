@@ -1,0 +1,46 @@
+<!-- saved_result_list_item.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/saved_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#222222" />
+
+        <TextView
+            android:id="@+id/saved_server"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#222222" />
+
+        <TextView
+            android:id="@+id/saved_customers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#222222"
+            android:layout_marginBottom="4dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/delete_result_button"
+        style="@style/BaseButton"
+        android:text="⌧"
+        android:textSize="24sp"
+        android:textColor="#FF0000"
+        android:background="#00FFFFFF"
+        android:layout_gravity="center_vertical" />
+</LinearLayout>

@@ -1,0 +1,120 @@
+<!-- fragment_server_sidebar.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#EEEEEE">
+
+    <TextView
+        android:id="@+id/server_sidebar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Servers"
+        android:textColor="#FF000000"
+        android:textSize="24sp" />
+
+    <ListView
+        android:id="@+id/server_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:background="#FFFFFF"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp">
+
+        <EditText
+            android:id="@+id/server_name_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:hint="Enter server name"
+            android:minHeight="48dp"
+            android:textColorHint="#A1887F" />
+
+        <Button
+            android:id="@+id/add_server_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_server"
+            android:backgroundTint="#012741"/>
+    </LinearLayout>
+
+    <!-- New Section for Number of Customers -->
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/number_of_customers_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="@string/number_of_customers"
+            android:textColor="#FF000000"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/customers_input"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_the_number_of_customers"
+            android:inputType="number"
+            android:minHeight="48dp" />
+
+        <!-- Buttons c1-c4 beneath the EditText -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/c1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#012741"
+                android:text="@string/_1" />
+
+            <Button
+                android:id="@+id/c2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#012741"
+                android:text="@string/_2" />
+
+            <Button
+                android:id="@+id/c3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#012741"
+                android:text="@string/_3" />
+
+            <Button
+                android:id="@+id/c4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#012741"
+                android:text="@string/_4" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
