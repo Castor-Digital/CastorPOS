@@ -70,8 +70,8 @@
             <Button
                 android:id="@+id/buttonDiscount"
                 style="@style/CalculatorButton"
-                android:text="Discount 10%"
-                android:textSize="24sp"
+                android:text="DIS. 10%"
+                android:textSize="28sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 android:backgroundTint="#5C3C52" />
@@ -79,7 +79,8 @@
             <Button
                 android:id="@+id/buttonClear"
                 style="@style/CalculatorButton"
-                android:text="AC"
+                android:text="Clear"
+                android:textSize="28sp"
                 android:backgroundTint="#5C3C52"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -204,7 +205,8 @@
             <Button
                 android:id="@+id/buttonOpenRegister"
                 style="@style/CalculatorButton"
-                android:text="N/S"
+                android:text="# / NS"
+                android:textSize="28sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 android:backgroundTint="#5C3C52" />

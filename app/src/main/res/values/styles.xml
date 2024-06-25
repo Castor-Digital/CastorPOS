@@ -11,16 +11,18 @@
 
     <!-- Button Style -->
     <style name="BaseButton">
-        <item name="android:background">#27374D</item>
-        <item name="android:textColor">#DDE6ED</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:background">#00FFFFFF</item>
+        <item name="android:textColor">#222222</item>
+        <item name="android:padding">4dp</item>
         <item name="android:layout_margin">4dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:shadowRadius">4</item>
     </style>
 
     <!-- Calculator Button Style -->
     <style name="CalculatorButton" parent="BaseButton">
+        <item name="android:textColor">#FFFFFF</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_height">0dp</item>
@@ -33,6 +35,7 @@
     <style name="CustomerButton" parent="BaseButton">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
+
     </style>
 
     <!-- EditText Style -->
@@ -54,7 +57,4 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
-    <!-- Custom Colors -->
-    <color name="selectedCustomerButton">#485872</color>
-    <color name="defaultCustomerButton">#012741</color>
 </resources>

@@ -33,8 +33,10 @@ android {
 
 dependencies {
     implementation ("com.github.mik3y:usb-serial-for-android:3.7.3")
+    implementation (libs.recyclerview.v121)
     implementation(libs.appcompat)
     implementation(libs.material)
+    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -35,6 +35,7 @@ public class ResultsSidebarFragment extends Fragment {
 
         adapter = new ResultsAdapter(results);
         recyclerView.setAdapter(adapter);
+        
 
         return view;
     }
