@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private DecimalFormat df = new DecimalFormat("$0.00");
     private double currentOperand;
     private DecimalFormat currencyFormat;
+    private int numberOfCustomers;
+    private String selectedServer;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -79,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
         operationDisplay = findViewById(R.id.operation_display);
         Button buttonDiscount = findViewById(R.id.buttonDiscount);
 
+        numberOfCustomers = 1;
+        selectedServer = "";
         // Initialize currentOperand to 0.00
         currentOperand = 0.00;
         // Initialize the currency format
@@ -197,17 +201,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveResult(String resultText) {
-        String serverName = serverSidebarFragment.getSelectedServer();
-        int customers = serverSidebarFragment.getNumberOfCustomers();  // Ensure this method exists in ServerSidebarFragment
-        SavedResult savedResult = new SavedResult(resultText, serverName, customers);  // Assuming customers field exists
-        resultsSidebarFragment.addResult(savedResult);
+        if (validateConditions()) {
+            String serverName = serverSidebarFragment.getSelectedServer();
+            int customers = serverSidebarFragment.getNumberOfCustomers();  // Ensure this method exists in ServerSidebarFragment
+            SavedResult savedResult = new SavedResult(resultText, serverName, customers);  // Assuming customers field exists
+            resultsSidebarFragment.addResult(savedResult);
 
 
-        // Reset the current operand to 0.00
-        operand1 = 0.00;
-        operand2 = 0.00;
-        currentInput.setLength(0); // Clear the current input
-        display.setText(df.format(0.00)); // Update the display to show 0.00
+            // Reset the current operand to 0.00
+            operand1 = 0.00;
+            operand2 = 0.00;
+            currentInput.setLength(0); // Clear the current input
+            display.setText(df.format(0.00)); // Update the display to show 0.00
+        }
+    }
+
+    private boolean validateConditions() {
+        String resultText = display.getText().toString().replace("$", "");
+        double resultAmount = resultText.isEmpty() ? 0.00 : Double.parseDouble(resultText);
+        /*
+        if (selectedServer.isEmpty()) {
+            Toast.makeText(this, "Please select a server.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (numberOfCustomers <= 0) {
+            Toast.makeText(this, "Please enter the number of customers.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+         */
+        if (resultAmount <= 0.00) {
+            Toast.makeText(this, "Please enter a total.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     private void updateDisplay() {
