@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private double operand2 = 0;
     private String currentOperation = "";
     private DecimalFormat df = new DecimalFormat("$0.00");
+    private double currentOperand;
+    private DecimalFormat currencyFormat;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -75,6 +77,14 @@ public class MainActivity extends AppCompatActivity {
 
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
+        Button buttonDiscount = findViewById(R.id.buttonDiscount);
+
+        // Initialize currentOperand to 0.00
+        currentOperand = 0.00;
+        // Initialize the currency format
+        currencyFormat = new DecimalFormat("$0.00");
+
+        buttonDiscount.setOnClickListener(v -> applyDiscount());
 
         // Initialize fragments
         resultsSidebarFragment = ResultsSidebarFragment.newInstance(savedResults);
@@ -269,6 +279,20 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Selected Server: " + serverName, Toast.LENGTH_SHORT).show();
     }
 
+    //Discount 10 percent -> rounds to the nearest 5 cent value
+    private void applyDiscount() {
+        String displayText = display.getText().toString().replace("$", "");
+        if (!displayText.isEmpty()) {
+            try {
+                currentOperand = Double.parseDouble(displayText);
+                currentOperand = currentOperand * 0.9;
+                currentOperand = Math.round(currentOperand * 20.0) / 20.0;
+                display.setText(currencyFormat.format(currentOperand));
+            } catch (NumberFormatException e) {
+                display.setText(currencyFormat.format(0.00));
+            }
+        }
+    }
 
     private void sendSerialSignal() {
         List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
