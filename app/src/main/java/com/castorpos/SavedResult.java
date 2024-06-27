@@ -1,16 +1,39 @@
 package com.castorpos;
 
-import java.util.Objects;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+@Entity(tableName = "saved_results")
 public class SavedResult {
-    private String resultText;
-    private String serverName;
-    private int customers;
 
+    @PrimaryKey(autoGenerate = true)
+    public int id;
+
+    @ColumnInfo(name = "result_text")
+    public String resultText;
+
+    @ColumnInfo(name = "server_name")
+    public String serverName;
+
+    @ColumnInfo(name = "amount")
+    public double amount;
+
+    @ColumnInfo(name = "customers")
+    public int customers;
+
+    // Constructor, getters, and setters...
     public SavedResult(String resultText, String serverName, int customers) {
         this.resultText = resultText;
         this.serverName = serverName;
         this.customers = customers;
+        this.amount = parseAmount(resultText);
+    }
+
+    private double parseAmount(String resultText) {
+        // Add logic to parse amount from resultText, e.g., if resultText is "$10.50", extract 10.50
+        // Assuming resultText is in the format "$10.50"
+        return Double.parseDouble(resultText.replaceAll("[^0-9.]", ""));
     }
 
     public String getResultText() {
@@ -21,22 +44,11 @@ public class SavedResult {
         return serverName;
     }
 
+    public double getAmount() {
+        return amount;
+    }
+
     public int getCustomers() {
         return customers;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SavedResult that = (SavedResult) o;
-        return customers == that.customers &&
-                Objects.equals(resultText, that.resultText) &&
-                Objects.equals(serverName, that.serverName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(resultText, serverName, customers);
     }
 }

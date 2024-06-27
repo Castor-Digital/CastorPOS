@@ -3,15 +3,22 @@ package com.castorpos;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHolder> {
     private List<SavedResult> results;
+    private OnItemClickListener onItemClickListener;
 
-    public ResultsAdapter(List<SavedResult> results) {
+    public interface OnItemClickListener {
+        void onItemDeleteClick(SavedResult result);
+    }
+
+    public ResultsAdapter(List<SavedResult> results, OnItemClickListener onItemClickListener) {
         this.results = results;
+        this.onItemClickListener = onItemClickListener;
     }
 
     @Override
@@ -26,7 +33,14 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
         SavedResult result = results.get(position);
         holder.resultTextView.setText(result.getResultText());
         holder.serverNameTextView.setText(result.getServerName());
-        holder.customersTextView.setText(String.valueOf(result.getCustomers())); // Display number of customers
+        holder.customersTextView.setText(String.valueOf(result.getCustomers()));
+
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemClickListener.onItemDeleteClick(result);
+            }
+        });
     }
 
     @Override
@@ -37,13 +51,15 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView resultTextView;
         public TextView serverNameTextView;
-        public TextView customersTextView; // Add this field
+        public TextView customersTextView;
+        public Button deleteButton;
 
         public ViewHolder(View view) {
             super(view);
             resultTextView = view.findViewById(R.id.saved_result);
             serverNameTextView = view.findViewById(R.id.saved_server);
-            customersTextView = view.findViewById(R.id.saved_customers); // Add this field
+            customersTextView = view.findViewById(R.id.saved_customers);
+            deleteButton = view.findViewById(R.id.delete_result_button);
         }
     }
 }

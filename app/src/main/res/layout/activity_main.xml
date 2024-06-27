@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Existing layout components -->
+
     <FrameLayout
         android:id="@+id/server_sidebar_container"
         android:layout_width="0dp"
@@ -99,7 +101,6 @@
                 android:text="/"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
-
 
             <Button
                 android:id="@+id/button7"
