@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#EEEEEE"> <!-- Add a background color to the whole fragment -->
+    android:background="#EEEEEE">
 
     <TextView
         android:id="@+id/results_sidebar_title"
@@ -24,6 +24,29 @@
         android:dividerHeight="1dp"
         android:background="#FFFFFF"
         android:padding="8dp"
-        android:layout_marginBottom="8dp" /> <!-- Add background and padding to the list -->
+        android:layout_marginBottom="8dp" />
+
+    <!-- Horizontal menu for additional buttons -->
+    <!-- Buttons c1-c4 beneath the EditText -->
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:textStyle="bold"
+        android:padding="2dp">
+
+        <Button
+            android:id="@+id/buttonTotalsScreen"
+            style="@style/CalculatorButton"
+            android:textSize="18sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#012741"
+            android:text="Totals" />
+
+    </LinearLayout>
 
 </LinearLayout>
