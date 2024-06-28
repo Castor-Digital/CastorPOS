@@ -1,14 +1,16 @@
 package com.castorpos;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,10 +47,10 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
         Button c3 = view.findViewById(R.id.c3);
         Button c4 = view.findViewById(R.id.c4);
 
-        c1.setOnClickListener(v -> customersInputEditText.setText("1"));
-        c2.setOnClickListener(v -> customersInputEditText.setText("2"));
-        c3.setOnClickListener(v -> customersInputEditText.setText("3"));
-        c4.setOnClickListener(v -> customersInputEditText.setText("4"));
+        c1.setOnClickListener(v -> updateNumberOfCustomers(1));
+        c2.setOnClickListener(v -> updateNumberOfCustomers(2));
+        c3.setOnClickListener(v -> updateNumberOfCustomers(3));
+        c4.setOnClickListener(v -> updateNumberOfCustomers(4));
 
         addButton.setOnClickListener(v -> {
             String serverName = serverNameEditText.getText().toString();
@@ -63,13 +65,34 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
     }
 
     @Override
-    public void onServerClick(int position) {
-        selectedServer = servers.get(position);
-        serverNameEditText.setText(selectedServer);
+    public void onServerSelected(String server) {
+        selectedServer = server;
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).onServerSelected(server);
+        }
+    }
+
+    @Override
+    public void onServerDeleted(String server) {
+        int position = servers.indexOf(server);
+        if (position >= 0) {
+            servers.remove(position);
+            adapter.notifyItemRemoved(position);
+            if (server.equals(selectedServer)) {
+                selectedServer = null;
+            }
+        }
     }
 
     public String getSelectedServer() {
         return selectedServer;
+    }
+
+    private void updateNumberOfCustomers(int customers) {
+        customersInputEditText.setText(String.valueOf(customers));
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).updateNumberOfCustomers(customers);
+        }
     }
 
     public int getNumberOfCustomers() {

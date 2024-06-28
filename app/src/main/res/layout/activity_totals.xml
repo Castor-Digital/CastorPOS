@@ -1,0 +1,44 @@
+<!-- activity_totals.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#EEEEEE">
+
+    <TextView
+        android:id="@+id/totalRevenueTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total Revenue: $0.00"
+        android:textSize="24sp"
+        android:textColor="#000000"/>
+
+    <Button
+        android:id="@+id/clearDataButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear All Data"
+        android:background="#D2042D"
+        android:textColor="#FFFFFF"
+        android:padding="4dp"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Section for results by server -->
+    <TextView
+        android:id="@+id/resultsByServerTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Results by Server"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#222222"
+        android:layout_marginTop="20dp"/>
+
+    <LinearLayout
+        android:id="@+id/serverResultsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#222222"
+        android:orientation="vertical"/>
+</LinearLayout>

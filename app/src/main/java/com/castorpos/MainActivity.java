@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,10 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.room.Room;
+
 import java.text.DecimalFormat;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ServerAdapter.OnServerClickListener {
     private ResultsSidebarFragment resultsSidebarFragment;
     private ServerSidebarFragment serverSidebarFragment;
     private List<SavedResult> savedResults = new ArrayList<>();
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private UsbManager usbManager;
     private UsbSerialPort serialPort;
     private EditText display;
+    private AppDatabase database;
     private TextView operationDisplay;
     private StringBuilder currentInput = new StringBuilder();
     private double operand1 = 0;
@@ -91,11 +95,10 @@ public class MainActivity extends AppCompatActivity {
         buttonDiscount.setOnClickListener(v -> applyDiscount());
 
         // Initialize fragments
-        resultsSidebarFragment = ResultsSidebarFragment.newInstance(savedResults);
+        resultsSidebarFragment = new ResultsSidebarFragment();
         serverSidebarFragment = new ServerSidebarFragment();
 
-        // Add the ServerSidebarFragment to the layout
-        serverSidebarFragment = new ServerSidebarFragment();
+        // Add the ServerSidebarFragment and ResultsSidebarFragment to the layout
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.server_sidebar_container, serverSidebarFragment);
@@ -106,8 +109,10 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
-        display = findViewById(R.id.display);
-        operationDisplay = findViewById(R.id.operation_display);
+        // Initialize the database
+        database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "app_database")
+                .fallbackToDestructiveMigration()
+                .build();
 
         // Number Buttons
         int[] numberButtonIds = {
@@ -198,15 +203,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     private void saveResult(String resultText) {
         if (validateConditions()) {
             String serverName = serverSidebarFragment.getSelectedServer();
             int customers = serverSidebarFragment.getNumberOfCustomers();  // Ensure this method exists in ServerSidebarFragment
-            SavedResult savedResult = new SavedResult(resultText, serverName, customers);  // Assuming customers field exists
+            SavedResult savedResult = new SavedResult(resultText, serverName, customers);
+
+            // Add result to the ResultsSidebarFragment
             resultsSidebarFragment.addResult(savedResult);
 
+            // Insert result into the database on a background thread
+            //database.resultsDao().insert(savedResult);
+            AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
+
+
+            Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Inserted new result: " + savedResult.getResultText());
 
             // Reset the current operand to 0.00
             operand1 = 0.00;
@@ -216,11 +231,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onServerSelected(String server) {
+        selectedServer = server;
+    }
+
+    @Override
+    public void onServerDeleted(String server) {
+
+    }
+
+    public void updateNumberOfCustomers(int customers) {
+        numberOfCustomers = customers;
+    }
+
     private boolean validateConditions() {
         String resultText = display.getText().toString().replace("$", "");
         double resultAmount = resultText.isEmpty() ? 0.00 : Double.parseDouble(resultText);
-        /*
-        if (selectedServer.isEmpty()) {
+
+        if (selectedServer == null || selectedServer.isEmpty()) {
             Toast.makeText(this, "Please select a server.", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -230,12 +259,21 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-         */
         if (resultAmount <= 0.00) {
             Toast.makeText(this, "Please enter a total.", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
+    }
+
+
+
+    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
+        @Override
+        protected Void doInBackground(SavedResult... results) {
+            database.resultsDao().insert(results[0]);
+            return null;
+        }
     }
 
     private void updateDisplay() {
@@ -297,10 +335,6 @@ public class MainActivity extends AppCompatActivity {
         currentOperation = "";
         display.setText("0.00");
         operationDisplay.setText("");
-    }
-
-    public void onServerSelected(String serverName) {
-        showSelectedServer(serverName);
     }
 
     private void showSelectedServer(String serverName) {
