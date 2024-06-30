@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.graphics.Color;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -228,7 +229,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             operand2 = 0.00;
             currentInput.setLength(0); // Clear the current input
             display.setText(df.format(0.00)); // Update the display to show 0.00
-        }
+            display.setTextColor(Color.parseColor("#222222"));
+            }
     }
 
     @Override
@@ -283,6 +285,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             displayValue = df.format(input);
         }
         display.setText(displayValue);
+        display.setTextColor(Color.parseColor("#222222"));
     }
 
     private void setOperation(String operation) {
@@ -335,6 +338,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         currentOperation = "";
         display.setText("0.00");
         operationDisplay.setText("");
+        display.setTextColor(Color.parseColor("#222222"));
     }
 
     private void showSelectedServer(String serverName) {
@@ -350,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 currentOperand = currentOperand * 0.9;
                 currentOperand = Math.round(currentOperand * 20.0) / 20.0;
                 display.setText(currencyFormat.format(currentOperand));
+                display.setTextColor(Color.parseColor("#006400"));
             } catch (NumberFormatException e) {
                 display.setText(currencyFormat.format(0.00));
             }
