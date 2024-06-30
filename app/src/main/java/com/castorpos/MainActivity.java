@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
@@ -33,6 +34,9 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private ResultsSidebarFragment resultsSidebarFragment;
     private ServerSidebarFragment serverSidebarFragment;
     private List<SavedResult> savedResults = new ArrayList<>();
+    private double originalAmount = 0.0;
+    private ResultsDao resultsDao;
+    private boolean cashMode = false;
 
     private static final String TAG = "MainActivity";
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
@@ -204,7 +208,49 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             }
         });
 
+        findViewById(R.id.buttonCash).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleCashButton();
+            }
+        });
+
+        findViewById(R.id.buttonDifference).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleDiffButton();
+            }
+        });
+
     }
+
+    private void handleCashButton() {
+        EditText display = findViewById(R.id.display);
+        String displayText = display.getText().toString().replace("$", "");
+        if (!displayText.isEmpty()) {
+            originalAmount = Double.parseDouble(displayText);
+            display.setText("$0.00"); // Show 0.00 for cash input
+            cashMode = true;
+        }
+    }
+
+    private void handleDiffButton() {
+        EditText display = findViewById(R.id.display);
+        String displayText = display.getText().toString().replace("$", "");
+        if (cashMode && !displayText.isEmpty()) {
+            double cashGiven = Double.parseDouble(displayText);
+            double change = cashGiven - originalAmount;
+            display.setTextColor(Color.parseColor("#006400")); // Change text color to dark green
+            display.setText(String.format("$%.2f", change));
+
+            // Save the original amount
+            saveResult(String.valueOf(originalAmount));
+            display.setTextColor(Color.parseColor("#222222"));
+            cashMode = false;
+        }
+    }
+
+
 
     private void saveResult(String resultText) {
         if (validateConditions()) {
