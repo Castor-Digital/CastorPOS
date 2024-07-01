@@ -30,11 +30,18 @@ public class ServerAdapter extends RecyclerView.Adapter<ServerAdapter.ServerView
         String server = servers.get(position);
         holder.serverName.setText(server);
 
+        //Hide the X just for To-Go server
+        if ("To-Go".equals(server)) {
+            holder.deleteServerButton.setVisibility(View.GONE);
+        } else {
+            holder.deleteServerButton.setVisibility(View.VISIBLE);
+        }
+
         // Highlight the selected server
         if (position == selectedPosition) {
-            holder.itemView.setBackgroundColor(0xFFADD8E6); // Use light blue color directly
+            holder.itemView.setBackgroundColor(0xFFADD8E6);
         } else {
-            holder.itemView.setBackgroundColor(0x00000000); // Transparent color
+            holder.itemView.setBackgroundColor(0x00000000);
         }
 
         holder.itemView.setOnClickListener(v -> {

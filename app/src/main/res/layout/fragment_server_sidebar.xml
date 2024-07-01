@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="Servers"
+        android:textStyle="bold"
         android:textColor="#FF000000"
         android:textSize="24sp" />
 
