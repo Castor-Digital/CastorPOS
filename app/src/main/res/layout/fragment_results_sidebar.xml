@@ -10,7 +10,8 @@
         android:id="@+id/results_sidebar_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Saved Results"
+        android:text="Saved Tickets"
+        android:textStyle="bold"
         android:textColor="#FF000000"
         android:textSize="24sp"
         android:layout_marginBottom="8dp" />

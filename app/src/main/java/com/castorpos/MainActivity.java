@@ -12,10 +12,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.graphics.Color;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -54,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private DecimalFormat currencyFormat;
     private int numberOfCustomers;
     private String selectedServer;
+    private Button doubleZeroButton;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
-                            sendSerialSignal();;
+                            sendSerialSignal();
                         }
                     } else {
                         Log.d(TAG, "permission denied for device " + device);
@@ -95,8 +95,13 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         currentOperand = 0.00;
         // Initialize the currency format
         currencyFormat = new DecimalFormat("$0.00");
+        display.setText("$0.00");
 
         buttonDiscount.setOnClickListener(v -> applyDiscount());
+        Button doubleZeroButton = findViewById(R.id.double_zero_button);
+        doubleZeroButton.setOnClickListener(v -> {
+            addDoubleZero();
+        });
 
         // Initialize fragments
         resultsSidebarFragment = new ResultsSidebarFragment();
@@ -274,7 +279,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             operand2 = 0.00;
             currentInput.setLength(0); // Clear the current input
             display.setText(df.format(0.00)); // Update the display to show 0.00
-        }
+            display.setTextColor(Color.parseColor("#222222"));
+            }
     }
 
     @Override
@@ -329,6 +335,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             displayValue = df.format(input);
         }
         display.setText(displayValue);
+        display.setTextColor(Color.parseColor("#222222"));
     }
 
     private void setOperation(String operation) {
@@ -379,8 +386,9 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         operand1 = 0;
         operand2 = 0;
         currentOperation = "";
-        display.setText("0.00");
+        display.setText("$0.00");
         operationDisplay.setText("");
+        display.setTextColor(Color.parseColor("#222222"));
     }
 
     private void showSelectedServer(String serverName) {
@@ -396,9 +404,21 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 currentOperand = currentOperand * 0.9;
                 currentOperand = Math.round(currentOperand * 20.0) / 20.0;
                 display.setText(currencyFormat.format(currentOperand));
+                display.setTextColor(Color.parseColor("#006400"));
             } catch (NumberFormatException e) {
                 display.setText(currencyFormat.format(0.00));
             }
+        }
+    }
+
+    private void addDoubleZero() {
+        String currentAmount = display.getText().toString().replace("$", "").replace(",", "");
+        try {
+            double amount = Double.parseDouble(currentAmount);
+            amount *= 100; // Shift the decimal two places to the right
+            display.setText(String.format("$%,.2f", amount));
+        } catch (NumberFormatException e) {
+            display.setText("$0.00");
         }
     }
 
