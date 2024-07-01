@@ -11,10 +11,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.graphics.Color;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,11 +24,6 @@ import java.util.List;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
-import android.view.inputmethod.InputMethodManager;
-import android.content.Context;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
-
 
 import java.text.DecimalFormat;
 import android.widget.Toast;
@@ -65,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
-                            sendSerialSignal();;
+                            sendSerialSignal();
                         }
                     } else {
                         Log.d(TAG, "permission denied for device " + device);

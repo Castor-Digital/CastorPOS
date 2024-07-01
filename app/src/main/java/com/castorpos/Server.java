@@ -1,5 +1,3 @@
-// Server.java
-
 package com.castorpos;
 
 public class Server {
