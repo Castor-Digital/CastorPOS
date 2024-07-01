@@ -204,6 +204,16 @@
                 android:layout_rowWeight="1" />
 
             <Button
+                android:id="@+id/double_zero_button"
+                style="@style/CalculatorButton"
+                android:backgroundTint="#485872"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1" />
+
+            <Button
                 android:id="@+id/buttonOpenRegister"
                 style="@style/CalculatorButton"
                 android:text="# / NS"

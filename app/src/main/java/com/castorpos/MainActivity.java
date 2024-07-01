@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private DecimalFormat currencyFormat;
     private int numberOfCustomers;
     private String selectedServer;
+    private Button doubleZeroButton;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -90,8 +91,13 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         currentOperand = 0.00;
         // Initialize the currency format
         currencyFormat = new DecimalFormat("$0.00");
+        display.setText("$0.00");
 
         buttonDiscount.setOnClickListener(v -> applyDiscount());
+        Button doubleZeroButton = findViewById(R.id.double_zero_button);
+        doubleZeroButton.setOnClickListener(v -> {
+            addDoubleZero();
+        });
 
         // Initialize fragments
         resultsSidebarFragment = new ResultsSidebarFragment();
@@ -334,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         operand1 = 0;
         operand2 = 0;
         currentOperation = "";
-        display.setText("0.00");
+        display.setText("$0.00");
         operationDisplay.setText("");
         display.setTextColor(Color.parseColor("#222222"));
     }
@@ -356,6 +362,17 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             } catch (NumberFormatException e) {
                 display.setText(currencyFormat.format(0.00));
             }
+        }
+    }
+
+    private void addDoubleZero() {
+        String currentAmount = display.getText().toString().replace("$", "").replace(",", "");
+        try {
+            double amount = Double.parseDouble(currentAmount);
+            amount *= 100; // Shift the decimal two places to the right
+            display.setText(String.format("$%,.2f", amount));
+        } catch (NumberFormatException e) {
+            display.setText("$0.00");
         }
     }
 
