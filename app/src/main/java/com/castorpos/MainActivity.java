@@ -191,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             public void onClick(View v) {
                 String resultText = display.getText().toString(); // Get the result text from your display or relevant source
                 saveResult(resultText);
+                sendSerialSignal(); //Open register on save (remove this line for testing on PC)
             }
         });
 
@@ -220,13 +221,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             }
         });
 
-        findViewById(R.id.buttonDifference).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                handleDiffButton();
-            }
-        });
-
     }
 
     private void handleCashButton() {
@@ -238,24 +232,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             cashMode = true;
         }
     }
-
-    private void handleDiffButton() {
-        EditText display = findViewById(R.id.display);
-        String displayText = display.getText().toString().replace("$", "");
-        if (cashMode && !displayText.isEmpty()) {
-            double cashGiven = Double.parseDouble(displayText);
-            double change = cashGiven - originalAmount;
-            display.setTextColor(Color.parseColor("#006400")); // Change text color to dark green
-            display.setText(String.format("$%.2f", change));
-
-            // Save the original amount
-            saveResult(String.valueOf(originalAmount));
-            display.setTextColor(Color.parseColor("#222222"));
-            cashMode = false;
-        }
-    }
-
-
 
     private void saveResult(String resultText) {
         if (validateConditions()) {
