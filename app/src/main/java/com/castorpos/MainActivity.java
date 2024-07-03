@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private boolean cashMode = false;
 
     private static final String TAG = "MainActivity";
-    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.android.castorpos.USB_PERMISSION";
     private UsbManager usbManager;
     private UsbSerialPort serialPort;
     private EditText display;
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
-                            sendSerialSignal();;
+                            sendSerialSignal();
                         }
                     } else {
                         Log.d(TAG, "permission denied for device " + device);
@@ -113,10 +113,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         fragmentTransaction.replace(R.id.server_sidebar_container, serverSidebarFragment);
         fragmentTransaction.replace(R.id.results_sidebar_container, resultsSidebarFragment);
         fragmentTransaction.commit();
-
-        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
 
         // Initialize the database
         database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "app_database")
@@ -195,14 +191,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             }
         });
 
-        // Open Register Button
-        findViewById(R.id.buttonOpenRegister).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendSerialSignal();
-            }
-        });
-
         // Backspace Button
         findViewById(R.id.buttonBackspace).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,6 +209,33 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             }
         });
 
+    }
+
+    private void sendSerialSignal() {
+        List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
+        if (availablePorts.isEmpty()) {
+            Log.e(TAG, "No serial ports available.");
+            return;
+        }
+
+        serialPort = availablePorts.get(0);
+        try {
+            UsbDevice device = serialPort.getDriver().getDevice();
+            if (usbManager.hasPermission(device)) {
+                serialPort.open(usbManager.openDevice(device));
+                serialPort.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+
+                byte[] signal = {0x1B, 0x70, 0x00, 0x19, (byte) 0xFA}; // Your serial command
+                serialPort.write(signal, 1000);
+                Log.d(TAG, "Serial signal sent successfully");
+
+                serialPort.close();
+            } else {
+                Log.e(TAG, "No permission to access USB device.");
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error sending serial signal.", e);
+        }
     }
 
     private void handleCashButton() {
@@ -294,16 +309,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         return true;
     }
 
-
-
-    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
-        @Override
-        protected Void doInBackground(SavedResult... results) {
-            database.resultsDao().insert(results[0]);
-            return null;
-        }
-    }
-
     private void updateDisplay() {
         String displayValue = "$0.00";
         if (currentInput.length() > 0) {
@@ -359,7 +364,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
-
     private void clear() {
         currentInput.setLength(0);
         operand1 = 0;
@@ -403,32 +407,11 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
-
-
-    private void sendSerialSignal() {
-        List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
-        if (availablePorts.isEmpty()) {
-            Log.e(TAG, "No serial ports available.");
-            return;
-        }
-
-        serialPort = availablePorts.get(0);
-        try {
-            UsbDevice device = serialPort.getDriver().getDevice();
-            if (usbManager.hasPermission(device)) {
-                serialPort.open(usbManager.openDevice(device));
-                serialPort.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-
-                byte[] signal = {0x1B, 0x70, 0x00, 0x19, (byte) 0xFA}; // Your serial command
-                serialPort.write(signal, 1000);
-                Log.d(TAG, "Serial signal sent successfully");
-
-                serialPort.close();
-            } else {
-                Log.e(TAG, "No permission to access USB device.");
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Error sending serial signal.", e);
+    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
+        @Override
+        protected Void doInBackground(SavedResult... results) {
+            database.resultsDao().insert(results[0]);
+            return null;
         }
     }
 }
