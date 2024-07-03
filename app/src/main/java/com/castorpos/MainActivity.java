@@ -88,6 +88,28 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
         Button buttonDiscount = findViewById(R.id.buttonDiscount);
+        Button buttonOpenRegister = findViewById(R.id.buttonOpenRegister);
+
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(usbReceiver, filter);
+
+        buttonOpenRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
+                if (!availablePorts.isEmpty()) {
+                    UsbDevice device = availablePorts.get(0).getDriver().getDevice();
+                    if (!usbManager.hasPermission(device)) {
+                        usbManager.requestPermission(device, permissionIntent);
+                    } else {
+                        sendSerialSignal();
+                    }
+                } else {
+                    Log.e(TAG, "No serial ports available.");
+                }
+            }
+        });
 
         numberOfCustomers = 1;
         selectedServer = "";
