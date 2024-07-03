@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private DecimalFormat df = new DecimalFormat("$0.00");
     private double currentOperand;
     private DecimalFormat currencyFormat;
-    private int numberOfCustomers;
+    private int numberOfCustomers = 1;;
     private String selectedServer;
     private Button doubleZeroButton;
 
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
-                            sendSerialSignal();
+                            sendSerialSignal();;
                         }
                     } else {
                         Log.d(TAG, "permission denied for device " + device);
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         int[] numberButtonIds = {
                 R.id.button0, R.id.button1, R.id.button2, R.id.button3,
                 R.id.button4, R.id.button5, R.id.button6, R.id.button7,
-                R.id.button8, R.id.button9
+                R.id.button8, R.id.button9, R.id.double_zero_button
         };
 
         View.OnClickListener numberClickListener = new View.OnClickListener() {
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             public void onClick(View v) {
                 String resultText = display.getText().toString(); // Get the result text from your display or relevant source
                 saveResult(resultText);
-                sendSerialSignal(); //Open register on save (remove this line for testing on PC)
+                //sendSerialSignal(); //Open register on save (remove this line for testing on PC)
             }
         });
 
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private void saveResult(String resultText) {
         if (validateConditions()) {
             String serverName = serverSidebarFragment.getSelectedServer();
-            int customers = serverSidebarFragment.getNumberOfCustomers();  // Ensure this method exists in ServerSidebarFragment
+            int customers = serverSidebarFragment.getNumberOfCustomers();
             SavedResult savedResult = new SavedResult(resultText, serverName, customers);
 
             // Add result to the ResultsSidebarFragment
@@ -324,38 +324,41 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     }
 
     private void calculateResult() {
-        if (currentInput.length() > 0 && !currentOperation.isEmpty()) {
-            operand2 = Double.parseDouble(currentInput.toString()) / 100;
-            double result = 0;
+        if (currentOperation.isEmpty()) {
+            return;
+        }
 
+        try {
+            double operand2 = currentOperand; // Use currentOperand directly
             switch (currentOperation) {
                 case "+":
-                    result = operand1 + operand2;
+                    operand1 += operand2;
                     break;
                 case "-":
-                    result = operand1 - operand2;
+                    operand1 -= operand2;
                     break;
                 case "*":
-                    result = operand1 * operand2;
+                    operand1 *= operand2;
                     break;
                 case "/":
                     if (operand2 != 0) {
-                        result = operand1 / operand2;
+                        operand1 /= operand2;
                     } else {
-                        display.setText("Error");
+                        Toast.makeText(this, "Cannot divide by zero / Fraction too small", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     break;
             }
 
-            display.setText(df.format(result));
-            operationDisplay.setText("");
-            currentInput.setLength(0);
-            operand1 = result;
-            operand2 = 0;
+            currentOperand = operand1; // Update currentOperand with the result
+            display.setText(String.format("$%,.2f", currentOperand)); // Update the display
             currentOperation = "";
+            currentInput.setLength(0); // Clear current input
+        } catch (NumberFormatException e) {
+            display.setText("$0.00");
         }
     }
+
 
     private void clear() {
         currentInput.setLength(0);
@@ -393,10 +396,14 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             double amount = Double.parseDouble(currentAmount);
             amount *= 100; // Shift the decimal two places to the right
             display.setText(String.format("$%,.2f", amount));
+            currentOperand = amount; // Update the current operand
         } catch (NumberFormatException e) {
             display.setText("$0.00");
+            currentOperand = 0.00;
         }
     }
+
+
 
     private void sendSerialSignal() {
         List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();

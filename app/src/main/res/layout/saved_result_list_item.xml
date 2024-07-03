@@ -1,4 +1,4 @@
-<!-- saved_result_list_item.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -14,27 +14,81 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/saved_result"
+            android:id="@+id/saved_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#222222" />
-
-        <TextView
-            android:id="@+id/saved_server"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#222222" />
-
-        <TextView
-            android:id="@+id/saved_customers"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#222222"
+            android:textSize="14sp"
+            android:textColor="#555555"
             android:layout_marginBottom="4dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+
+            <TextView
+                android:id="@+id/label_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total: "
+                android:textSize="16sp"
+                android:textColor="#222222" />
+
+            <TextView
+                android:id="@+id/saved_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#222222" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/label_server"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Server:"
+                android:textSize="16sp"
+                android:textColor="#222222" />
+
+            <TextView
+                android:id="@+id/saved_server"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#222222"
+                android:layout_marginLeft="4dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/label_customers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Customers:"
+                android:textSize="16sp"
+                android:textColor="#222222" />
+
+            <TextView
+                android:id="@+id/saved_customers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#222222"
+                android:layout_marginLeft="4dp"/>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

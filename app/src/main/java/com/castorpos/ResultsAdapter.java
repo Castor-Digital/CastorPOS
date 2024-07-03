@@ -7,6 +7,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 
 public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHolder> {
     private List<SavedResult> results;
@@ -30,6 +34,9 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        String time = getCurrentTimeFormatted();
+        holder.savedTime.setText(time);
+
         SavedResult result = results.get(position);
         holder.resultTextView.setText(result.getResultText());
         holder.serverNameTextView.setText(result.getServerName());
@@ -43,23 +50,32 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
         });
     }
 
+    private String getCurrentTimeFormatted() {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        return sdf.format(new Date());
+    }
+
     @Override
     public int getItemCount() {
         return results.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView resultTextView;
-        public TextView serverNameTextView;
-        public TextView customersTextView;
+        public TextView savedTime, resultTextView, serverNameTextView, customersTextView;
         public Button deleteButton;
 
         public ViewHolder(View view) {
             super(view);
+            savedTime = itemView.findViewById(R.id.saved_time);
             resultTextView = view.findViewById(R.id.saved_result);
             serverNameTextView = view.findViewById(R.id.saved_server);
             customersTextView = view.findViewById(R.id.saved_customers);
             deleteButton = view.findViewById(R.id.delete_result_button);
         }
+    }
+
+    public void addResult(SavedResult result) {
+        results.add(0, result); // Add new result at the top
+        notifyItemInserted(0);
     }
 }

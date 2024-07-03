@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.room.Room;
 import java.util.List;
+import java.util.Collections;
 
 public class ResultsSidebarFragment extends Fragment {
     private RecyclerView recyclerView;
@@ -58,6 +59,11 @@ public class ResultsSidebarFragment extends Fragment {
         return view;
     }
 
+    private void addNewResult(SavedResult result) {
+        adapter.addResult(result);
+        recyclerView.scrollToPosition(0); // Scroll to the top to show the latest result
+    }
+
     @Override
     public void onDestroyView() {
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(clearDataReceiver);
@@ -87,6 +93,7 @@ public class ResultsSidebarFragment extends Fragment {
         @Override
         protected void onPostExecute(List<SavedResult> results) {
             savedResults = results;
+            Collections.reverse(results);
             adapter = new ResultsAdapter(savedResults, new ResultsAdapter.OnItemClickListener() {
                 @Override
                 public void onItemDeleteClick(SavedResult result) {
