@@ -3,9 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp"
-    android:background="@drawable/border"
-    android:layout_marginBottom="8dp">
+    android:padding="2dp"
+    android:background="@drawable/border">
 
     <!-- TextView for displaying the server name -->
     <TextView
@@ -13,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:textSize="24sp"
+        android:textSize="18sp"
         android:textColor="#222222"
         android:gravity="center_vertical" />
 
@@ -24,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:text="✕"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textColor="#8B0000"
         android:textStyle="bold"
         android:gravity="center_vertical|right" />

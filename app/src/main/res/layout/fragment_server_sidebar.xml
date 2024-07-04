@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="Servers"
+        android:textStyle="bold"
         android:textColor="#FF000000"
         android:textSize="24sp" />
 
@@ -40,6 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:hint="Enter server name"
+            android:imeOptions="actionDone"
             android:inputType="textCapWords"
             android:minHeight="48dp"
             android:textColorHint="#d3d3d3" />
@@ -66,8 +68,8 @@
             android:id="@+id/number_of_customers_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/number_of_customers"
-            android:textSize="20sp"
+            android:text="Customers: "
+            android:textSize="18sp"
             android:textColor="#FF000000" />
 
         <EditText
@@ -79,6 +81,7 @@
             android:inputType="number"
             android:layout_marginLeft="4dp"
             android:textSize="20sp"
+            android:textStyle="bold"
             android:minHeight="48dp" />
     </LinearLayout>
 

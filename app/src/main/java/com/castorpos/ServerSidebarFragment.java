@@ -1,7 +1,6 @@
 package com.castorpos;
 
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 
 public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnServerClickListener {
     private RecyclerView recyclerView;
@@ -21,7 +24,6 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
     private EditText serverNameEditText;
     private EditText customersInputEditText;
     private Button addButton;
-    private Button editButton;
     private String selectedServer;
 
     public ServerSidebarFragment() {
@@ -37,6 +39,7 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
 
         adapter = new ServerAdapter(servers, this);
         recyclerView.setAdapter(adapter);
+        servers.add("To-Go");
 
         serverNameEditText = view.findViewById(R.id.server_name_edit_text);
         customersInputEditText = view.findViewById(R.id.customers_input);
@@ -53,15 +56,33 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
         c4.setOnClickListener(v -> updateNumberOfCustomers(4));
 
         addButton.setOnClickListener(v -> {
-            String serverName = serverNameEditText.getText().toString();
-            if (!serverName.isEmpty()) {
-                servers.add(serverName);
-                adapter.notifyItemInserted(servers.size() - 1);
-                serverNameEditText.setText("");
+            addServer();
+        });
+
+        serverNameEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                addServer();
+                return true;
             }
+            return false;
         });
 
         return view;
+    }
+
+    private void addServer() {
+        String serverName = serverNameEditText.getText().toString().trim();
+        if (!serverName.isEmpty()) {
+            servers.add(serverName);
+            adapter.notifyItemInserted(servers.size() - 1);
+            serverNameEditText.setText("");
+            // Hide the keyboard
+            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(serverNameEditText.getWindowToken(), 0);
+        } else {
+            Toast.makeText(getContext(), "Server name cannot be empty", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

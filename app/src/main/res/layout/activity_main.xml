@@ -61,19 +61,29 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:rowCount="6"
-            android:columnCount="4"
+            android:rowCount="5"
+            android:columnCount="5"
             android:orientation="horizontal"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp">
 
+            <!-- Top Row -->
             <Button
                 android:id="@+id/buttonDiscount"
                 style="@style/CalculatorButton"
-                android:text="DIS. 10%"
-                android:textSize="28sp"
+                android:text="Dis."
+                android:textSize="24sp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:backgroundTint="#5C3C52" />
+
+            <Button
+                android:id="@+id/buttonOpenRegister"
+                style="@style/CalculatorButton"
+                android:text="NS"
+                android:textSize="24sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 android:backgroundTint="#5C3C52" />
@@ -81,8 +91,8 @@
             <Button
                 android:id="@+id/buttonClear"
                 style="@style/CalculatorButton"
-                android:text="Clear"
-                android:textSize="28sp"
+                android:text="C"
+                android:textSize="24sp"
                 android:backgroundTint="#5C3C52"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -91,6 +101,7 @@
                 android:id="@+id/buttonBackspace"
                 style="@style/CalculatorButton"
                 android:text="⌫"
+                android:textSize="32sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 android:backgroundTint="#5C3C52" />
@@ -99,13 +110,25 @@
                 android:id="@+id/buttonDivide"
                 style="@style/CalculatorButton"
                 android:text="/"
+                android:textSize="32sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
+
+            <!-- Second Row -->
+            <Button
+                android:id="@+id/buttonCredit"
+                style="@style/CalculatorButton"
+                android:text="Credit"
+                android:textSize="24sp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:backgroundTint="#5C3C52" />
 
             <Button
                 android:id="@+id/button7"
                 style="@style/CalculatorButton"
                 android:text="7"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -114,6 +137,7 @@
                 android:id="@+id/button8"
                 style="@style/CalculatorButton"
                 android:text="8"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -122,6 +146,7 @@
                 android:id="@+id/button9"
                 style="@style/CalculatorButton"
                 android:text="9"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -130,13 +155,25 @@
                 android:id="@+id/buttonMultiply"
                 style="@style/CalculatorButton"
                 android:text="*"
+                android:textSize="32sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
+
+            <!-- Third Row -->
+            <Button
+                android:id="@+id/buttonCash"
+                style="@style/CalculatorButton"
+                android:text="Cash"
+                android:textSize="24sp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:backgroundTint="#5C3C52" />
 
             <Button
                 android:id="@+id/button4"
                 style="@style/CalculatorButton"
                 android:text="4"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -145,6 +182,7 @@
                 android:id="@+id/button5"
                 style="@style/CalculatorButton"
                 android:text="5"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -153,6 +191,7 @@
                 android:id="@+id/button6"
                 style="@style/CalculatorButton"
                 android:text="6"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -161,13 +200,25 @@
                 android:id="@+id/buttonSubtract"
                 style="@style/CalculatorButton"
                 android:text="-"
+                android:textSize="32sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
+
+            <!-- Fourth Row -->
+            <Button
+                android:id="@+id/buttonVoid"
+                style="@style/CalculatorButton"
+                android:text="Void"
+                android:textSize="24sp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:backgroundTint="#5C3C52" />
 
             <Button
                 android:id="@+id/button1"
                 style="@style/CalculatorButton"
                 android:text="1"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -176,6 +227,7 @@
                 android:id="@+id/button2"
                 style="@style/CalculatorButton"
                 android:text="2"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -184,6 +236,7 @@
                 android:id="@+id/button3"
                 style="@style/CalculatorButton"
                 android:text="3"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
@@ -192,39 +245,52 @@
                 android:id="@+id/buttonAdd"
                 style="@style/CalculatorButton"
                 android:text="+"
+                android:textSize="24sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
+
+            <!-- Fifth/Bottom Row -->
+            <Button
+                android:id="@+id/buttonReset"
+                style="@style/CalculatorButton"
+                android:text="Reset"
+                android:textSize="24sp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:backgroundTint="#5C3C52" />
 
             <Button
                 android:id="@+id/button0"
                 style="@style/CalculatorButton"
                 android:text="0"
+                android:textSize="32sp"
                 android:backgroundTint="#485872"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
 
             <Button
-                android:id="@+id/buttonOpenRegister"
+                android:id="@+id/double_zero_button"
                 style="@style/CalculatorButton"
-                android:text="# / NS"
-                android:textSize="28sp"
+                android:backgroundTint="#485872"
+                android:text="00"
+                android:textSize="32sp"
                 android:layout_columnWeight="1"
-                android:layout_rowWeight="1"
-                android:backgroundTint="#5C3C52" />
+                android:layout_rowWeight="1" />
 
             <Button
                 android:id="@+id/buttonSave"
                 style="@style/CalculatorButton"
                 android:text="Save ✅"
-                android:textSize="28sp"
+                android:textSize="20sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:backgroundTint="#5C3C52" />
+                android:backgroundTint="#006400" />
 
             <Button
                 android:id="@+id/buttonEquals"
                 style="@style/CalculatorButton"
                 android:text="="
+                android:textSize="32sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1" />
 

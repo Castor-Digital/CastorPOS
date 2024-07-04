@@ -5,16 +5,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -25,17 +24,17 @@ import java.util.List;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
-
 import java.text.DecimalFormat;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements ServerAdapter.OnServerClickListener {
     private ResultsSidebarFragment resultsSidebarFragment;
     private ServerSidebarFragment serverSidebarFragment;
-    private List<SavedResult> savedResults = new ArrayList<>();
+    private double originalAmount = 0.0;
+    private boolean cashMode = false;
 
     private static final String TAG = "MainActivity";
-    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.android.castorpos.USB_PERMISSION";
     private UsbManager usbManager;
     private UsbSerialPort serialPort;
     private EditText display;
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private DecimalFormat df = new DecimalFormat("$0.00");
     private double currentOperand;
     private DecimalFormat currencyFormat;
-    private int numberOfCustomers;
+    private int numberOfCustomers = 1;;
     private String selectedServer;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
-                            sendSerialSignal();;
+                            sendSerialSignal();
                         }
                     } else {
                         Log.d(TAG, "permission denied for device " + device);
@@ -68,10 +67,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             }
         }
     };
-
-    private StringBuilder operationStringBuilder = new StringBuilder();
-    private double currentResult = 0;
-    private boolean newOperation = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +78,28 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
-        Button buttonDiscount = findViewById(R.id.buttonDiscount);
+
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(usbReceiver, filter);
+
+        // Open Register / NoSale Button
+        findViewById(R.id.buttonOpenRegister).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
+                if (!availablePorts.isEmpty()) {
+                    UsbDevice device = availablePorts.get(0).getDriver().getDevice();
+                    if (!usbManager.hasPermission(device)) {
+                        usbManager.requestPermission(device, permissionIntent);
+                    } else {
+                        sendSerialSignal();
+                    }
+                } else {
+                    Log.e(TAG, "No serial ports available.");
+                }
+            }
+        });
 
         numberOfCustomers = 1;
         selectedServer = "";
@@ -91,8 +107,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         currentOperand = 0.00;
         // Initialize the currency format
         currencyFormat = new DecimalFormat("$0.00");
-
-        buttonDiscount.setOnClickListener(v -> applyDiscount());
+        display.setText("$0.00");
 
         // Initialize fragments
         resultsSidebarFragment = new ResultsSidebarFragment();
@@ -105,10 +120,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         fragmentTransaction.replace(R.id.results_sidebar_container, resultsSidebarFragment);
         fragmentTransaction.commit();
 
-        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
-
         // Initialize the database
         database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "app_database")
                 .fallbackToDestructiveMigration()
@@ -118,9 +129,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         int[] numberButtonIds = {
                 R.id.button0, R.id.button1, R.id.button2, R.id.button3,
                 R.id.button4, R.id.button5, R.id.button6, R.id.button7,
-                R.id.button8, R.id.button9
+                R.id.button8, R.id.button9, R.id.double_zero_button
         };
-
         View.OnClickListener numberClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 updateDisplay();
             }
         };
-
         for (int id : numberButtonIds) {
             findViewById(id).setOnClickListener(numberClickListener);
         }
@@ -159,24 +168,18 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 setOperation("/");
             }
         });
-
-        // Clear Button
         findViewById(R.id.buttonClear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 clear();
             }
         });
-
-        // Equals Button
         findViewById(R.id.buttonEquals).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 calculateResult();
             }
         });
-
-        // Save Result Button
         findViewById(R.id.buttonSave).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,16 +187,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 saveResult(resultText);
             }
         });
-
-        // Open Register Button
-        findViewById(R.id.buttonOpenRegister).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendSerialSignal();
-            }
-        });
-
-        // Backspace Button
         findViewById(R.id.buttonBackspace).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -203,159 +196,21 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 }
             }
         });
-
-    }
-
-    private void saveResult(String resultText) {
-        if (validateConditions()) {
-            String serverName = serverSidebarFragment.getSelectedServer();
-            int customers = serverSidebarFragment.getNumberOfCustomers();  // Ensure this method exists in ServerSidebarFragment
-            SavedResult savedResult = new SavedResult(resultText, serverName, customers);
-
-            // Add result to the ResultsSidebarFragment
-            resultsSidebarFragment.addResult(savedResult);
-
-            // Insert result into the database on a background thread
-            //database.resultsDao().insert(savedResult);
-            AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
-
-
-            Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Inserted new result: " + savedResult.getResultText());
-
-            // Reset the current operand to 0.00
-            operand1 = 0.00;
-            operand2 = 0.00;
-            currentInput.setLength(0); // Clear the current input
-            display.setText(df.format(0.00)); // Update the display to show 0.00
-        }
-    }
-
-    @Override
-    public void onServerSelected(String server) {
-        selectedServer = server;
-    }
-
-    @Override
-    public void onServerDeleted(String server) {
-
-    }
-
-    public void updateNumberOfCustomers(int customers) {
-        numberOfCustomers = customers;
-    }
-
-    private boolean validateConditions() {
-        String resultText = display.getText().toString().replace("$", "");
-        double resultAmount = resultText.isEmpty() ? 0.00 : Double.parseDouble(resultText);
-
-        if (selectedServer == null || selectedServer.isEmpty()) {
-            Toast.makeText(this, "Please select a server.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        if (numberOfCustomers <= 0) {
-            Toast.makeText(this, "Please enter the number of customers.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        if (resultAmount <= 0.00) {
-            Toast.makeText(this, "Please enter a total.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
-    }
-
-
-
-    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
-        @Override
-        protected Void doInBackground(SavedResult... results) {
-            database.resultsDao().insert(results[0]);
-            return null;
-        }
-    }
-
-    private void updateDisplay() {
-        String displayValue = "$0.00";
-        if (currentInput.length() > 0) {
-            double input = Double.parseDouble(currentInput.toString()) / 100;
-            displayValue = df.format(input);
-        }
-        display.setText(displayValue);
-    }
-
-    private void setOperation(String operation) {
-        if (currentInput.length() > 0) {
-            operand1 = Double.parseDouble(currentInput.toString()) / 100;
-            currentOperation = operation;
-            operationDisplay.setText(df.format(operand1) + " " + operation);
-            currentInput.setLength(0);
-        }
-    }
-
-    private void calculateResult() {
-        if (currentInput.length() > 0 && !currentOperation.isEmpty()) {
-            operand2 = Double.parseDouble(currentInput.toString()) / 100;
-            double result = 0;
-
-            switch (currentOperation) {
-                case "+":
-                    result = operand1 + operand2;
-                    break;
-                case "-":
-                    result = operand1 - operand2;
-                    break;
-                case "*":
-                    result = operand1 * operand2;
-                    break;
-                case "/":
-                    if (operand2 != 0) {
-                        result = operand1 / operand2;
-                    } else {
-                        display.setText("Error");
-                        return;
-                    }
-                    break;
+        findViewById(R.id.buttonCash).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleCashButton();
             }
-
-            display.setText(df.format(result));
-            operationDisplay.setText("");
-            currentInput.setLength(0);
-            operand1 = result;
-            operand2 = 0;
-            currentOperation = "";
-        }
+        });
+        findViewById(R.id.double_zero_button).setOnClickListener(v -> {
+            addDoubleZero();
+        });
+        findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
     }
 
-    private void clear() {
-        currentInput.setLength(0);
-        operand1 = 0;
-        operand2 = 0;
-        currentOperation = "";
-        display.setText("0.00");
-        operationDisplay.setText("");
-    }
+    /* -------------------- Methods -------------------- */
 
-    private void showSelectedServer(String serverName) {
-        Toast.makeText(this, "Selected Server: " + serverName, Toast.LENGTH_SHORT).show();
-    }
-
-    //Discount 10 percent -> rounds to the nearest 5 cent value
-    private void applyDiscount() {
-        String displayText = display.getText().toString().replace("$", "");
-        if (!displayText.isEmpty()) {
-            try {
-                currentOperand = Double.parseDouble(displayText);
-                currentOperand = currentOperand * 0.9;
-                currentOperand = Math.round(currentOperand * 20.0) / 20.0;
-                display.setText(currencyFormat.format(currentOperand));
-            } catch (NumberFormatException e) {
-                display.setText(currencyFormat.format(0.00));
-            }
-        }
-    }
-
+    //sendSerialSignal - for opening cash register
     private void sendSerialSignal() {
         List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
         if (availablePorts.isEmpty()) {
@@ -382,4 +237,185 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             Log.e(TAG, "Error sending serial signal.", e);
         }
     }
+
+    private void handleCashButton() {
+        EditText display = findViewById(R.id.display);
+        String displayText = display.getText().toString().replace("$", "");
+        if (!displayText.isEmpty()) {
+            originalAmount = Double.parseDouble(displayText);
+            display.setText("$0.00"); // Show 0.00 for cash input
+            cashMode = true;
+        }
+    }
+
+    //saveResult - saves the total, server, # of customers
+    private void saveResult(String resultText) {
+        if (validateConditions()) {
+            String serverName = serverSidebarFragment.getSelectedServer();
+            int customers = serverSidebarFragment.getNumberOfCustomers();
+            SavedResult savedResult = new SavedResult(resultText, serverName, customers);
+
+            // Add result to the ResultsSidebarFragment
+            resultsSidebarFragment.addResult(savedResult);
+
+            // Insert result into the database on a background thread
+            //database.resultsDao().insert(savedResult);
+            AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
+
+            Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
+            sendSerialSignal(); //Open register on save (remove this line for testing on PC)
+
+            // Reset the current operand to 0.00
+            operand1 = 0.00;
+            operand2 = 0.00;
+            currentInput.setLength(0); // Clear the current input
+            display.setText(df.format(0.00)); // Update the display to show 0.00
+            display.setTextColor(Color.parseColor("#222222"));
+            }
+    }
+
+    //InsertResultTask - for saveResult
+    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
+        @Override
+        protected Void doInBackground(SavedResult... results) {
+            database.resultsDao().insert(results[0]);
+            return null;
+        }
+    }
+
+    @Override
+    public void onServerSelected(String server) {
+        selectedServer = server;
+    }
+
+    @Override
+    public void onServerDeleted(String server) {
+
+    }
+
+    public void updateNumberOfCustomers(int customers) {
+        numberOfCustomers = customers;
+    }
+
+    //validateConditions - prerequisites for saving result, must have server/customers/total
+    private boolean validateConditions() {
+        String resultText = display.getText().toString().replace("$", "");
+        double resultAmount = resultText.isEmpty() ? 0.00 : Double.parseDouble(resultText);
+
+        if (selectedServer == null || selectedServer.isEmpty()) {
+            Toast.makeText(this, "Please select a server.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (numberOfCustomers <= 0) {
+            Toast.makeText(this, "Please enter the number of customers.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (resultAmount <= 0.00) {
+            Toast.makeText(this, "Please enter a total.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    //updateDisplay - sets the calculator display
+    private void updateDisplay() {
+        String displayValue = "$0.00";
+        if (currentInput.length() > 0) {
+            double input = Double.parseDouble(currentInput.toString()) / 100;
+            displayValue = df.format(input);
+        }
+        display.setText(displayValue);
+        display.setTextColor(Color.parseColor("#222222"));
+    }
+
+    //setOperation - sets the math operation based on input
+    private void setOperation(String operation) {
+        if (currentInput.length() > 0) {
+            operand1 = Double.parseDouble(currentInput.toString()) / 100;
+            currentOperation = operation;
+            operationDisplay.setText(df.format(operand1) + " " + operation);
+            currentInput.setLength(0);
+        }
+    }
+
+    //calculateResult - performs operation
+    private void calculateResult() {
+        if (currentOperation.isEmpty()) {
+            return;
+        }
+
+        try {
+            double operand2 = currentOperand; // Use currentOperand directly
+            switch (currentOperation) {
+                case "+":
+                    operand1 += operand2;
+                    break;
+                case "-":
+                    operand1 -= operand2;
+                    break;
+                case "*":
+                    operand1 *= operand2;
+                    break;
+                case "/":
+                    if (operand2 != 0) {
+                        operand1 /= operand2;
+                    } else {
+                        Toast.makeText(this, "Cannot divide by zero / Fraction too small", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    break;
+            }
+
+            currentOperand = operand1; // Update currentOperand with the result
+            display.setText(String.format("$%,.2f", currentOperand)); // Update the display
+            currentOperation = "";
+            currentInput.setLength(0); // Clear current input
+        } catch (NumberFormatException e) {
+            display.setText("$0.00");
+        }
+    }
+
+    //clear - clears calculator
+    private void clear() {
+        currentInput.setLength(0);
+        operand1 = 0;
+        operand2 = 0;
+        currentOperation = "";
+        display.setText("$0.00");
+        operationDisplay.setText("");
+        display.setTextColor(Color.parseColor("#222222"));
+    }
+
+    //applyDiscount - discounts the total by 10 percent and rounds to the nearest 5 cent value
+    private void applyDiscount() {
+        String displayText = display.getText().toString().replace("$", "");
+        if (!displayText.isEmpty()) {
+            try {
+                currentOperand = Double.parseDouble(displayText);
+                currentOperand = currentOperand * 0.9;
+                currentOperand = Math.round(currentOperand * 20.0) / 20.0;
+                display.setText(currencyFormat.format(currentOperand));
+                display.setTextColor(Color.parseColor("#006400"));
+            } catch (NumberFormatException e) {
+                display.setText(currencyFormat.format(0.00));
+            }
+        }
+    }
+
+    //addDoubleZero - appends 00, for dollar amounts or math operations
+    private void addDoubleZero() {
+        String currentAmount = display.getText().toString().replace("$", "").replace(",", "");
+        try {
+            double amount = Double.parseDouble(currentAmount);
+            amount *= 100; // Shift the decimal two places to the right
+            display.setText(String.format("$%,.2f", amount));
+            currentOperand = amount; // Update the current operand
+        } catch (NumberFormatException e) {
+            display.setText("$0.00");
+            currentOperand = 0.00;
+        }
+    }
+
 }
