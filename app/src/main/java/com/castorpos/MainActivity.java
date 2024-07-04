@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.graphics.Color;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -25,16 +24,13 @@ import java.util.List;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
-
 import java.text.DecimalFormat;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements ServerAdapter.OnServerClickListener {
     private ResultsSidebarFragment resultsSidebarFragment;
     private ServerSidebarFragment serverSidebarFragment;
-    private List<SavedResult> savedResults = new ArrayList<>();
     private double originalAmount = 0.0;
-    private ResultsDao resultsDao;
     private boolean cashMode = false;
 
     private static final String TAG = "MainActivity";
@@ -53,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private DecimalFormat currencyFormat;
     private int numberOfCustomers = 1;;
     private String selectedServer;
-    private Button doubleZeroButton;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -73,10 +68,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     };
 
-    private StringBuilder operationStringBuilder = new StringBuilder();
-    private double currentResult = 0;
-    private boolean newOperation = true;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getSupportActionBar().hide();
@@ -87,14 +78,13 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
-        Button buttonDiscount = findViewById(R.id.buttonDiscount);
-        Button buttonOpenRegister = findViewById(R.id.buttonOpenRegister);
 
         PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
-        buttonOpenRegister.setOnClickListener(new View.OnClickListener() {
+        // Open Register / NoSale Button
+        findViewById(R.id.buttonOpenRegister).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
@@ -119,12 +109,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         currencyFormat = new DecimalFormat("$0.00");
         display.setText("$0.00");
 
-        buttonDiscount.setOnClickListener(v -> applyDiscount());
-        Button doubleZeroButton = findViewById(R.id.double_zero_button);
-        doubleZeroButton.setOnClickListener(v -> {
-            addDoubleZero();
-        });
-
         // Initialize fragments
         resultsSidebarFragment = new ResultsSidebarFragment();
         serverSidebarFragment = new ServerSidebarFragment();
@@ -147,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 R.id.button4, R.id.button5, R.id.button6, R.id.button7,
                 R.id.button8, R.id.button9, R.id.double_zero_button
         };
-
         View.OnClickListener numberClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 updateDisplay();
             }
         };
-
         for (int id : numberButtonIds) {
             findViewById(id).setOnClickListener(numberClickListener);
         }
@@ -186,24 +168,18 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 setOperation("/");
             }
         });
-
-        // Clear Button
         findViewById(R.id.buttonClear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 clear();
             }
         });
-
-        // Equals Button
         findViewById(R.id.buttonEquals).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 calculateResult();
             }
         });
-
-        // Save Result Button
         findViewById(R.id.buttonSave).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -212,8 +188,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 //sendSerialSignal(); //Open register on save (remove this line for testing on PC)
             }
         });
-
-        // Backspace Button
         findViewById(R.id.buttonBackspace).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -223,16 +197,21 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 }
             }
         });
-
         findViewById(R.id.buttonCash).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 handleCashButton();
             }
         });
-
+        findViewById(R.id.double_zero_button).setOnClickListener(v -> {
+            addDoubleZero();
+        });
+        findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
     }
 
+    /* -------------------- Methods -------------------- */
+
+    //sendSerialSignal - for opening cash register
     private void sendSerialSignal() {
         List<UsbSerialPort> availablePorts = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager).get(0).getPorts();
         if (availablePorts.isEmpty()) {
@@ -270,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
+    //saveResult - saves the total, server, # of customers
     private void saveResult(String resultText) {
         if (validateConditions()) {
             String serverName = serverSidebarFragment.getSelectedServer();
@@ -283,9 +263,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             //database.resultsDao().insert(savedResult);
             AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
 
-
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Inserted new result: " + savedResult.getResultText());
 
             // Reset the current operand to 0.00
             operand1 = 0.00;
@@ -294,6 +272,15 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             display.setText(df.format(0.00)); // Update the display to show 0.00
             display.setTextColor(Color.parseColor("#222222"));
             }
+    }
+
+    //InsertResultTask - for saveResult
+    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
+        @Override
+        protected Void doInBackground(SavedResult... results) {
+            database.resultsDao().insert(results[0]);
+            return null;
+        }
     }
 
     @Override
@@ -310,6 +297,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         numberOfCustomers = customers;
     }
 
+    //validateConditions - prerequisites for saving result, must have server/customers/total
     private boolean validateConditions() {
         String resultText = display.getText().toString().replace("$", "");
         double resultAmount = resultText.isEmpty() ? 0.00 : Double.parseDouble(resultText);
@@ -331,6 +319,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         return true;
     }
 
+    //updateDisplay - sets the calculator display
     private void updateDisplay() {
         String displayValue = "$0.00";
         if (currentInput.length() > 0) {
@@ -341,6 +330,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         display.setTextColor(Color.parseColor("#222222"));
     }
 
+    //setOperation - sets the math operation based on input
     private void setOperation(String operation) {
         if (currentInput.length() > 0) {
             operand1 = Double.parseDouble(currentInput.toString()) / 100;
@@ -350,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
+    //calculateResult - performs operation
     private void calculateResult() {
         if (currentOperation.isEmpty()) {
             return;
@@ -386,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
+    //clear - clears calculator
     private void clear() {
         currentInput.setLength(0);
         operand1 = 0;
@@ -396,11 +388,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         display.setTextColor(Color.parseColor("#222222"));
     }
 
-    private void showSelectedServer(String serverName) {
-        Toast.makeText(this, "Selected Server: " + serverName, Toast.LENGTH_SHORT).show();
-    }
-
-    //Discount 10 percent -> rounds to the nearest 5 cent value
+    //applyDiscount - discounts the total by 10 percent and rounds to the nearest 5 cent value
     private void applyDiscount() {
         String displayText = display.getText().toString().replace("$", "");
         if (!displayText.isEmpty()) {
@@ -416,6 +404,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
+    //addDoubleZero - appends 00, for dollar amounts or math operations
     private void addDoubleZero() {
         String currentAmount = display.getText().toString().replace("$", "").replace(",", "");
         try {
@@ -429,11 +418,4 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
-    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
-        @Override
-        protected Void doInBackground(SavedResult... results) {
-            database.resultsDao().insert(results[0]);
-            return null;
-        }
-    }
 }
