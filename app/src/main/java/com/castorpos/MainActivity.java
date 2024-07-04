@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             public void onClick(View v) {
                 String resultText = display.getText().toString(); // Get the result text from your display or relevant source
                 saveResult(resultText);
-                //sendSerialSignal(); //Open register on save (remove this line for testing on PC)
             }
         });
         findViewById(R.id.buttonBackspace).setOnClickListener(new View.OnClickListener() {
@@ -264,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
+            sendSerialSignal(); //Open register on save (remove this line for testing on PC)
 
             // Reset the current operand to 0.00
             operand1 = 0.00;
