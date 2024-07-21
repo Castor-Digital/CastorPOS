@@ -40,6 +40,7 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
         adapter = new ServerAdapter(servers, this);
         recyclerView.setAdapter(adapter);
         servers.add("To-Go");
+        servers.add("Gift Certificate");
 
         serverNameEditText = view.findViewById(R.id.server_name_edit_text);
         customersInputEditText = view.findViewById(R.id.customers_input);

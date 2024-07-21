@@ -73,8 +73,8 @@
             <Button
                 android:id="@+id/buttonDiscount"
                 style="@style/CalculatorButton"
-                android:text="Dis."
-                android:textSize="24sp"
+                android:text="Discount"
+                android:textSize="22sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 android:backgroundTint="#5C3C52" />
@@ -82,8 +82,8 @@
             <Button
                 android:id="@+id/buttonOpenRegister"
                 style="@style/CalculatorButton"
-                android:text="NS"
-                android:textSize="24sp"
+                android:text="NS/OPEN"
+                android:textSize="22sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 android:backgroundTint="#5C3C52" />
@@ -91,7 +91,7 @@
             <Button
                 android:id="@+id/buttonClear"
                 style="@style/CalculatorButton"
-                android:text="C"
+                android:text="Clear"
                 android:textSize="24sp"
                 android:backgroundTint="#5C3C52"
                 android:layout_columnWeight="1"
@@ -118,11 +118,11 @@
             <Button
                 android:id="@+id/buttonCredit"
                 style="@style/CalculatorButton"
-                android:text="Credit"
+                android:text="CC"
                 android:textSize="24sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:backgroundTint="#5C3C52" />
+                android:backgroundTint="#27374D" />
 
             <Button
                 android:id="@+id/button7"
@@ -167,7 +167,7 @@
                 android:textSize="24sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:backgroundTint="#5C3C52" />
+                android:backgroundTint="#27374D" />
 
             <Button
                 android:id="@+id/button4"
@@ -212,7 +212,7 @@
                 android:textSize="24sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:backgroundTint="#5C3C52" />
+                android:backgroundTint="#27374D" />
 
             <Button
                 android:id="@+id/button1"
@@ -257,7 +257,7 @@
                 android:textSize="24sp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:backgroundTint="#5C3C52" />
+                android:backgroundTint="#27374D" />
 
             <Button
                 android:id="@+id/button0"
