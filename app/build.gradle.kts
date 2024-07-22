@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.core:core:1.7.0")
     implementation ("com.github.mik3y:usb-serial-for-android:3.7.3")
     implementation (libs.recyclerview.v121)
     implementation(libs.appcompat)

@@ -1,5 +1,6 @@
 package com.castorpos;
 
+import androidx.core.content.ContextCompat;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
         PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
+        ContextCompat.registerReceiver(this, usbReceiver, filter, ContextCompat.RECEIVER_EXPORTED);
 
         // Open Register / NoSale Button
         findViewById(R.id.buttonOpenRegister).setOnClickListener(new View.OnClickListener() {
