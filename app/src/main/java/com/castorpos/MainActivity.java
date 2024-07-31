@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         int[] numberButtonIds = {
                 R.id.button0, R.id.button1, R.id.button2, R.id.button3,
                 R.id.button4, R.id.button5, R.id.button6, R.id.button7,
-                R.id.button8, R.id.button9, R.id.double_zero_button
+                R.id.button8, R.id.button9, R.id.buttonDoubleZero
         };
         View.OnClickListener numberClickListener = new View.OnClickListener() {
             @Override
@@ -161,12 +161,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             @Override
             public void onClick(View v) {
                 setOperation("*");
-            }
-        });
-        findViewById(R.id.buttonDivide).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setOperation("/");
             }
         });
         findViewById(R.id.buttonClear).setOnClickListener(new View.OnClickListener() {
@@ -203,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 handleCashButton();
             }
         });
-        findViewById(R.id.double_zero_button).setOnClickListener(v -> {
+        findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> {
             addDoubleZero();
         });
         findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
@@ -334,10 +328,17 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     //setOperation - sets the math operation based on input
     private void setOperation(String operation) {
         if (currentInput.length() > 0) {
-            operand1 = Double.parseDouble(currentInput.toString()) / 100;
+            if (currentOperation.isEmpty()) {
+                operand1 = Double.parseDouble(currentInput.toString());
+            } else {
+                calculateResult(); // Chain operations
+                operand1 = Double.parseDouble(display.getText().toString().replace("$", ""));
+            }
             currentOperation = operation;
             operationDisplay.setText(df.format(operand1) + " " + operation);
             currentInput.setLength(0);
+        } else {
+            Toast.makeText(this, "Enter a number first", Toast.LENGTH_SHORT).show();
         }
     }
 
