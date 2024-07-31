@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         findViewById(R.id.buttonClear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clear();
+                clearDisplay();
             }
         });
         findViewById(R.id.buttonEquals).setOnClickListener(new View.OnClickListener() {
@@ -314,14 +314,27 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         return true;
     }
 
+    private void appendDigit(String digit) {
+        if (digit.equals(".") && currentInput.toString().contains(".")) {
+            return; // Prevent multiple decimal points
+        }
+        currentInput.append(digit);
+        updateDisplay();
+    }
+
     //updateDisplay - sets the calculator display
     private void updateDisplay() {
-        String displayValue = "$0.00";
-        if (currentInput.length() > 0) {
-            double input = Double.parseDouble(currentInput.toString()) / 100;
-            displayValue = df.format(input);
+        if (currentInput.length() == 0) {
+            display.setText(df.format(0));
+            return;
         }
-        display.setText(displayValue);
+
+        // Parse the current input as cents
+        long inputAsCents = Long.parseLong(currentInput.toString());
+        double valueInDollars = inputAsCents / 100.0;
+
+        // Set the display text
+        display.setText(df.format(valueInDollars));
         display.setTextColor(Color.parseColor("#222222"));
     }
 
@@ -329,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private void setOperation(String operation) {
         if (currentInput.length() > 0) {
             if (currentOperation.isEmpty()) {
-                operand1 = Double.parseDouble(currentInput.toString());
+                operand1 = Long.parseLong(currentInput.toString()) / 100.0;
             } else {
                 calculateResult(); // Chain operations
                 operand1 = Double.parseDouble(display.getText().toString().replace("$", ""));
@@ -344,50 +357,40 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
     //calculateResult - performs operation
     private void calculateResult() {
-        if (currentOperation.isEmpty()) {
-            return;
-        }
-
-        try {
-            double operand2 = currentOperand; // Use currentOperand directly
+        if (currentInput.length() > 0 && !currentOperation.isEmpty()) {
+            operand2 = Long.parseLong(currentInput.toString()) / 100.0;
+            double result = 0;
             switch (currentOperation) {
                 case "+":
-                    operand1 += operand2;
+                    result = operand1 + operand2;
                     break;
                 case "-":
-                    operand1 -= operand2;
+                    result = operand1 - operand2;
                     break;
                 case "*":
-                    operand1 *= operand2;
+                    result = operand1 * operand2;
                     break;
-                case "/":
-                    if (operand2 != 0) {
-                        operand1 /= operand2;
-                    } else {
-                        Toast.makeText(this, "Cannot divide by zero / Fraction too small", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    break;
+                default:
+                    return;
             }
-
-            currentOperand = operand1; // Update currentOperand with the result
-            display.setText(String.format("$%,.2f", currentOperand)); // Update the display
+            display.setText(df.format(result));
+            operationDisplay.setText(df.format(operand1) + " " + currentOperation + " " + df.format(operand2) + " =");
+            currentInput.setLength(0);
             currentOperation = "";
-            currentInput.setLength(0); // Clear current input
-        } catch (NumberFormatException e) {
-            display.setText("$0.00");
+            operand1 = result; // Store result for chaining
+        } else {
+            Toast.makeText(this, "Complete the operation first", Toast.LENGTH_SHORT).show();
         }
     }
 
-    //clear - clears calculator
-    private void clear() {
+    //clearDisplay - clears calculator display and any stored operation info
+    private void clearDisplay() {
         currentInput.setLength(0);
+        display.setText(df.format(0));
+        operationDisplay.setText("");
+        currentOperation = "";
         operand1 = 0;
         operand2 = 0;
-        currentOperation = "";
-        display.setText("$0.00");
-        operationDisplay.setText("");
-        display.setTextColor(Color.parseColor("#222222"));
     }
 
     //applyDiscount - discounts the total by 10 percent and rounds to the nearest 5 cent value
