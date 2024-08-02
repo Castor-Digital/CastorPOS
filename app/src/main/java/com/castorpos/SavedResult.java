@@ -6,7 +6,6 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "saved_results")
 public class SavedResult {
-
     @PrimaryKey(autoGenerate = true)
     public int id;
 
@@ -22,11 +21,15 @@ public class SavedResult {
     @ColumnInfo(name = "customers")
     public int customers;
 
+    @ColumnInfo(name = "is_credit")
+    public boolean isCredit; // New field to differentiate between cash and credit results
+
     // Constructor, getters, and setters...
-    public SavedResult(String resultText, String serverName, int customers) {
+    public SavedResult(String resultText, String serverName, int customers, boolean isCredit) {
         this.resultText = resultText;
         this.serverName = serverName;
         this.customers = customers;
+        this.isCredit = isCredit;
         this.amount = parseAmount(resultText);
     }
 
@@ -50,5 +53,9 @@ public class SavedResult {
 
     public int getCustomers() {
         return customers;
+    }
+
+    public boolean isCredit() {
+        return isCredit;
     }
 }

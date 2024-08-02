@@ -179,7 +179,15 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             @Override
             public void onClick(View v) {
                 String resultText = display.getText().toString(); // Get the result text from your display or relevant source
-                saveResult(resultText);
+                saveResult(resultText, false);
+            }
+        });
+
+        findViewById(R.id.buttonCredit).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String resultText = display.getText().toString(); // Get the result text from your display or relevant source
+                saveResult(resultText, true);
             }
         });
         findViewById(R.id.buttonBackspace).setOnClickListener(new View.OnClickListener() {
@@ -191,16 +199,10 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 }
             }
         });
-        findViewById(R.id.buttonCash).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                handleCashButton();
-            }
-        });
-        findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> {
-            addDoubleZero();
-        });
+        findViewById(R.id.buttonCash).setOnClickListener(v -> handleCashButton());
+        findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> addDoubleZero());
         findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
+
     }
 
     /* -------------------- Methods -------------------- */
@@ -244,11 +246,11 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     }
 
     //saveResult - saves the total, server, # of customers
-    private void saveResult(String resultText) {
+    private void saveResult(String resultText, boolean isCredit) {
         if (validateConditions()) {
             String serverName = serverSidebarFragment.getSelectedServer();
             int customers = serverSidebarFragment.getNumberOfCustomers();
-            SavedResult savedResult = new SavedResult(resultText, serverName, customers);
+            SavedResult savedResult = new SavedResult(resultText, serverName, customers, isCredit);
 
             // Add result to the ResultsSidebarFragment
             resultsSidebarFragment.addResult(savedResult);
@@ -258,7 +260,10 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
-            sendSerialSignal(); //Open register on save (remove this line for testing on PC)
+
+            if (!isCredit) {
+                sendSerialSignal(); // Send serial signal to open drawer only for cash results
+            }
 
             // Reset the current operand to 0.00
             operand1 = 0.00;

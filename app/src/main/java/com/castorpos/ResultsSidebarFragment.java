@@ -21,8 +21,19 @@ public class ResultsSidebarFragment extends Fragment {
     private RecyclerView recyclerView;
     private ResultsAdapter adapter;
     private List<SavedResult> savedResults; // This holds data fetched from the database
+    private List<SavedResult> creditResults;
     private AppDatabase database;
     private BroadcastReceiver clearDataReceiver;
+
+    private void loadResults() {
+        // Load cash results
+        savedResults = database.resultsDao().getResultsByType(false);
+        // Load credit results
+        creditResults = database.resultsDao().getResultsByType(true);
+        // Update the adapter
+        adapter = new ResultsAdapter(getContext(), savedResults, creditResults);
+        recyclerView.setAdapter(adapter);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

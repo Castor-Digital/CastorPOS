@@ -1,5 +1,6 @@
 package com.castorpos;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,9 @@ import java.util.Locale;
 public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHolder> {
     private List<SavedResult> results;
     private OnItemClickListener onItemClickListener;
+
+    public ResultsAdapter(Context context, List<SavedResult> savedResults, List<SavedResult> creditResults) {
+    }
 
     public interface OnItemClickListener {
         void onItemDeleteClick(SavedResult result);
