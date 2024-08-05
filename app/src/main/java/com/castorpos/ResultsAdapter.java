@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,9 +17,14 @@ import java.util.Locale;
 
 public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHolder> {
     private List<SavedResult> results;
+    private List<SavedResult> creditResults;
+    private Context context;
     private OnItemClickListener onItemClickListener;
 
-    public ResultsAdapter(Context context, List<SavedResult> savedResults, List<SavedResult> creditResults) {
+    public ResultsAdapter(Context context, List<SavedResult> results, List<SavedResult> creditResults) {
+        this.context = context;
+        this.results = results != null ? results : new ArrayList<>(); // Ensure non-null list
+        this.creditResults = creditResults != null ? creditResults : new ArrayList<>(); // Ensure non-null list
     }
 
     public interface OnItemClickListener {
@@ -61,7 +68,7 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return results.size();
+        return results.size() + creditResults.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

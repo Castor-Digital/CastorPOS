@@ -14,26 +14,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.room.Room;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
 public class ResultsSidebarFragment extends Fragment {
     private RecyclerView recyclerView;
     private ResultsAdapter adapter;
-    private List<SavedResult> savedResults; // This holds data fetched from the database
-    private List<SavedResult> creditResults;
+    private List<SavedResult> savedResults = new ArrayList<>();
+    private List<SavedResult> creditResults = new ArrayList<>();
     private AppDatabase database;
     private BroadcastReceiver clearDataReceiver;
-
-    private void loadResults() {
-        // Load cash results
-        savedResults = database.resultsDao().getResultsByType(false);
-        // Load credit results
-        creditResults = database.resultsDao().getResultsByType(true);
-        // Update the adapter
-        adapter = new ResultsAdapter(getContext(), savedResults, creditResults);
-        recyclerView.setAdapter(adapter);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,8 +39,7 @@ public class ResultsSidebarFragment extends Fragment {
         recyclerView = view.findViewById(R.id.results_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Load saved results in a background thread
-        new LoadResultsTask().execute();
+        database = AppDatabase.getDatabase(getContext());
 
         view.findViewById(R.id.buttonTotalsScreen).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,22 +86,19 @@ public class ResultsSidebarFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private class LoadResultsTask extends AsyncTask<Void, Void, List<SavedResult>> {
+    private class LoadResultsTask extends AsyncTask<Void, Void, Void> {
         @Override
-        protected List<SavedResult> doInBackground(Void... voids) {
-            return database.resultsDao().getAllResultsDirect();
+        protected Void doInBackground(Void... voids) {
+            // Load cash results
+            savedResults = database.resultsDao().getResultsByType(false);
+            // Load credit results
+            creditResults = database.resultsDao().getResultsByType(true);
+            return null;
         }
 
         @Override
-        protected void onPostExecute(List<SavedResult> results) {
-            savedResults = results;
-            Collections.reverse(results);
-            adapter = new ResultsAdapter(savedResults, new ResultsAdapter.OnItemClickListener() {
-                @Override
-                public void onItemDeleteClick(SavedResult result) {
-                    deleteResult(result);
-                }
-            });
+        protected void onPostExecute(Void aVoid) {
+            adapter = new ResultsAdapter(getContext(), savedResults, creditResults);
             recyclerView.setAdapter(adapter);
         }
     }

@@ -24,7 +24,6 @@ public class SavedResult {
     @ColumnInfo(name = "is_credit")
     public boolean isCredit; // New field to differentiate between cash and credit results
 
-    // Constructor, getters, and setters...
     public SavedResult(String resultText, String serverName, int customers, boolean isCredit) {
         this.resultText = resultText;
         this.serverName = serverName;
@@ -34,8 +33,6 @@ public class SavedResult {
     }
 
     private double parseAmount(String resultText) {
-        // Add logic to parse amount from resultText, e.g., if resultText is "$10.50", extract 10.50
-        // Assuming resultText is in the format "$10.50"
         return Double.parseDouble(resultText.replaceAll("[^0-9.]", ""));
     }
 
