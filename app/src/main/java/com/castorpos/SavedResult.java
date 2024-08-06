@@ -22,7 +22,7 @@ public class SavedResult {
     public int customers;
 
     @ColumnInfo(name = "is_credit")
-    public boolean isCredit; // New field to differentiate between cash and credit results
+    public boolean isCredit; // to differentiate between cash and credit results
 
     public SavedResult(String resultText, String serverName, int customers, boolean isCredit) {
         this.resultText = resultText;
@@ -33,7 +33,9 @@ public class SavedResult {
     }
 
     private double parseAmount(String resultText) {
-        return Double.parseDouble(resultText.replaceAll("[^0-9.]", ""));
+        // TODO: (Not yet functional) Remove commas from the string before parsing to double
+        String cleanedResultText = resultText.replaceAll("[^\\d.]", "");
+        return Double.parseDouble(cleanedResultText);
     }
 
     public String getResultText() {

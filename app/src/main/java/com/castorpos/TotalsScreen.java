@@ -21,6 +21,8 @@ public class TotalsScreen extends AppCompatActivity {
 
     private AppDatabase database;
     private TextView totalRevenueTextView;
+    private TextView totalCreditRevenueTextView;
+
     private LinearLayout serverResultsContainer;
     private BroadcastReceiver totalRevenueUpdateReceiver;
     private Button clearDataButton;
@@ -32,6 +34,8 @@ public class TotalsScreen extends AppCompatActivity {
         setContentView(R.layout.activity_totals);
 
         totalRevenueTextView = findViewById(R.id.totalRevenueTextView);
+        totalCreditRevenueTextView = findViewById(R.id.totalCCRevenueTextView);
+
         serverResultsContainer = findViewById(R.id.serverResultsContainer);
         clearDataButton = findViewById(R.id.clearDataButton);
 
@@ -41,13 +45,13 @@ public class TotalsScreen extends AppCompatActivity {
                 .build();
 
         // Calculate and display the total revenue
-        new CalculateTotalRevenueTask().execute();
+        AsyncTask<Void, Void, Double> execute = new CalculateTotalRevenueTask().execute();
 
         // Register the broadcast receiver
         totalRevenueUpdateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                new CalculateTotalRevenueTask().execute();
+                AsyncTask<Void, Void, Double> execute1 = execute;
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(totalRevenueUpdateReceiver,
@@ -60,7 +64,49 @@ public class TotalsScreen extends AppCompatActivity {
                 showConfirmationDialog();
             }
         });
+        loadTotals();
     }
+
+    private void loadTotals() {
+        new LoadTotalsTask().execute();
+    }
+
+    private class LoadTotalsTask extends AsyncTask<Void, Void, Totals> {
+        @Override
+        protected Totals doInBackground(Void... voids) {
+            List<SavedResult> cashResults = database.resultsDao().getResultsByType(false);
+            List<SavedResult> creditResults = database.resultsDao().getResultsByType(true);
+
+            double totalRevenue = 0;
+            for (SavedResult result : cashResults) {
+                totalRevenue += result.getAmount();
+            }
+
+            double totalCreditRevenue = 0;
+            for (SavedResult result : creditResults) {
+                totalCreditRevenue += result.getAmount();
+            }
+
+            return new Totals(totalRevenue, totalCreditRevenue);
+        }
+
+        @Override
+        protected void onPostExecute(Totals totals) {
+            totalRevenueTextView.setText(String.format("Total Revenue: $%.2f", totals.totalRevenue));
+            totalCreditRevenueTextView.setText(String.format("Total Credit Card Revenue: $%.2f", totals.totalCreditRevenue));
+        }
+    }
+
+    private static class Totals {
+        double totalRevenue;
+        double totalCreditRevenue;
+
+        Totals(double totalRevenue, double totalCreditRevenue) {
+            this.totalRevenue = totalRevenue;
+            this.totalCreditRevenue = totalCreditRevenue;
+        }
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -117,24 +163,6 @@ public class TotalsScreen extends AppCompatActivity {
         }
     }
 
-    private class CalculateServerResultsTask extends AsyncTask<Void, Void, List<ServerResults>> {
-        @Override
-        protected List<ServerResults> doInBackground(Void... voids) {
-            return database.resultsDao().getServerResults();
-        }
-
-        @Override
-        protected void onPostExecute(List<ServerResults> serverResults) {
-            serverResultsContainer.removeAllViews();
-            for (ServerResults result : serverResults) {
-                TextView serverResultView = new TextView(TotalsScreen.this);
-                serverResultView.setText(result.serverName + " - $" + String.format("%.2f", result.totalRevenue) + ", " + result.totalCustomers + " customers");
-                serverResultView.setTextColor(0xFF222222); // Set text color to #222222
-                serverResultsContainer.addView(serverResultView);
-            }
-        }
-    }
-
     private class ClearAllDataTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
@@ -154,4 +182,24 @@ public class TotalsScreen extends AppCompatActivity {
             LocalBroadcastManager.getInstance(TotalsScreen.this).sendBroadcast(clearIntent);
         }
     }
+
+    private class CalculateServerResultsTask extends AsyncTask<Void, Void, List<ServerResults>> {
+        @Override
+        protected List<ServerResults> doInBackground(Void... voids) {
+            return database.resultsDao().getServerResults();
+        }
+
+        @Override
+        protected void onPostExecute(List<ServerResults> serverResults) {
+            serverResultsContainer.removeAllViews();
+            for (ServerResults result : serverResults) {
+                TextView serverResultView = new TextView(TotalsScreen.this);
+                serverResultView.setText(result.serverName + " - $" + String.format("%.2f", result.totalRevenue) + ", " + result.totalCustomers + " customers");
+                serverResultView.setTextColor(0xFF222222); // Set text color to #222222
+                serverResultsContainer.addView(serverResultView);
+            }
+        }
+    }
+
+
 }

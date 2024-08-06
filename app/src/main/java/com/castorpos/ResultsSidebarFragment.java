@@ -62,6 +62,7 @@ public class ResultsSidebarFragment extends Fragment {
     }
 
     private void addNewResult(SavedResult result) {
+
         adapter.addResult(result);
         recyclerView.scrollToPosition(0); // Scroll to the top to show the latest result
     }
@@ -73,8 +74,17 @@ public class ResultsSidebarFragment extends Fragment {
     }
 
     public void addResult(SavedResult result) {
-        savedResults.add(result);
-        adapter.notifyItemInserted(savedResults.size() - 1);
+        if (result.isCredit()) {
+            creditResults.add(result);
+            if (adapter != null) {
+                adapter.notifyItemInserted(creditResults.size() - 1);
+            }
+        } else {
+            savedResults.add(result);
+            if (adapter != null) {
+                adapter.notifyItemInserted(savedResults.size() - 1);
+            }
+        }
     }
 
     private void deleteResult(SavedResult result) {
@@ -83,7 +93,10 @@ public class ResultsSidebarFragment extends Fragment {
 
     private void clearResults() {
         savedResults.clear();
-        adapter.notifyDataSetChanged();
+        creditResults.clear();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private class LoadResultsTask extends AsyncTask<Void, Void, Void> {
@@ -93,6 +106,15 @@ public class ResultsSidebarFragment extends Fragment {
             savedResults = database.resultsDao().getResultsByType(false);
             // Load credit results
             creditResults = database.resultsDao().getResultsByType(true);
+
+            if (savedResults != null) {
+                ResultsSidebarFragment.this.savedResults = savedResults;
+            }
+
+            if (creditResults != null) {
+                ResultsSidebarFragment.this.creditResults = creditResults;
+            }
+
             return null;
         }
 

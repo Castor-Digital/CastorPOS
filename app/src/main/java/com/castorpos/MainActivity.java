@@ -261,17 +261,18 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
 
-            if (!isCredit) {
-                sendSerialSignal(); // Send serial signal to open drawer only for cash results
-            }
-
             // Reset the current operand to 0.00
             operand1 = 0.00;
             operand2 = 0.00;
             currentInput.setLength(0); // Clear the current input
             display.setText(df.format(0.00)); // Update the display to show 0.00
             display.setTextColor(Color.parseColor("#222222"));
+
+            if (!isCredit) {
+                sendSerialSignal(); // Send serial signal to open drawer only for cash results
             }
+
+        }
     }
 
     //InsertResultTask - for saveResult
