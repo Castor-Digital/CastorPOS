@@ -22,7 +22,6 @@ public class TotalsScreen extends AppCompatActivity {
     private AppDatabase database;
     private TextView totalRevenueTextView;
     private TextView totalCreditRevenueTextView;
-
     private LinearLayout serverResultsContainer;
     private BroadcastReceiver totalRevenueUpdateReceiver;
     private Button clearDataButton;
@@ -35,7 +34,6 @@ public class TotalsScreen extends AppCompatActivity {
 
         totalRevenueTextView = findViewById(R.id.totalRevenueTextView);
         totalCreditRevenueTextView = findViewById(R.id.totalCCRevenueTextView);
-
         serverResultsContainer = findViewById(R.id.serverResultsContainer);
         clearDataButton = findViewById(R.id.clearDataButton);
 
@@ -44,18 +42,18 @@ public class TotalsScreen extends AppCompatActivity {
                 .fallbackToDestructiveMigration()
                 .build();
 
-        // Calculate and display the total revenue
-        AsyncTask<Void, Void, Double> execute = new CalculateTotalRevenueTask().execute();
-
         // Register the broadcast receiver
         totalRevenueUpdateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                AsyncTask<Void, Void, Double> execute1 = execute;
+                loadTotals();
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(totalRevenueUpdateReceiver,
                 new IntentFilter("update-total-revenue"));
+
+        // Load totals when activity is created
+        loadTotals();
 
         // Set the clear data button click listener
         clearDataButton.setOnClickListener(new View.OnClickListener() {
@@ -64,7 +62,12 @@ public class TotalsScreen extends AppCompatActivity {
                 showConfirmationDialog();
             }
         });
-        loadTotals();
+    }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(totalRevenueUpdateReceiver);
+        super.onDestroy();
     }
 
     private void loadTotals() {
@@ -94,24 +97,8 @@ public class TotalsScreen extends AppCompatActivity {
         protected void onPostExecute(Totals totals) {
             totalRevenueTextView.setText(String.format("Total Revenue: $%.2f", totals.totalRevenue));
             totalCreditRevenueTextView.setText(String.format("Total Credit Card Revenue: $%.2f", totals.totalCreditRevenue));
+            new CalculateServerResultsTask().execute();
         }
-    }
-
-    private static class Totals {
-        double totalRevenue;
-        double totalCreditRevenue;
-
-        Totals(double totalRevenue, double totalCreditRevenue) {
-            this.totalRevenue = totalRevenue;
-            this.totalCreditRevenue = totalCreditRevenue;
-        }
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(totalRevenueUpdateReceiver);
-        super.onDestroy();
     }
 
     private void showConfirmationDialog() {
@@ -145,24 +132,6 @@ public class TotalsScreen extends AppCompatActivity {
         dialog.show();
     }
 
-    private class CalculateTotalRevenueTask extends AsyncTask<Void, Void, Double> {
-        @Override
-        protected Double doInBackground(Void... voids) {
-            List<SavedResult> savedResults = database.resultsDao().getAllResultsDirect();
-            double totalRevenue = 0;
-            for (SavedResult result : savedResults) {
-                totalRevenue += result.getAmount();
-            }
-            return totalRevenue;
-        }
-
-        @Override
-        protected void onPostExecute(Double totalRevenue) {
-            totalRevenueTextView.setText("Total Revenue: $" + String.format("%.2f", totalRevenue));
-            new CalculateServerResultsTask().execute();
-        }
-    }
-
     private class ClearAllDataTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
@@ -172,14 +141,21 @@ public class TotalsScreen extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            // Recalculate total revenue after clearing data
-            new CalculateTotalRevenueTask().execute();
-            // Broadcast that the total revenue needs to be updated
+            loadTotals();
             Intent updateIntent = new Intent("update-total-revenue");
             LocalBroadcastManager.getInstance(TotalsScreen.this).sendBroadcast(updateIntent);
-            // Broadcast to clear all data from the sidebar
             Intent clearIntent = new Intent("clear-all-data");
             LocalBroadcastManager.getInstance(TotalsScreen.this).sendBroadcast(clearIntent);
+        }
+    }
+
+    private static class Totals {
+        double totalRevenue;
+        double totalCreditRevenue;
+
+        Totals(double totalRevenue, double totalCreditRevenue) {
+            this.totalRevenue = totalRevenue;
+            this.totalCreditRevenue = totalCreditRevenue;
         }
     }
 
@@ -200,6 +176,4 @@ public class TotalsScreen extends AppCompatActivity {
             }
         }
     }
-
-
 }
