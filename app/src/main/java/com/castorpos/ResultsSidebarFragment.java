@@ -1,5 +1,6 @@
 package com.castorpos;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,8 +34,17 @@ public class ResultsSidebarFragment extends Fragment {
         adapter = new ResultsAdapter(getContext(), savedResults, creditResults);
         recyclerView.setAdapter(adapter);
         loadResults();
+
+        view.findViewById(R.id.buttonTotalsScreen).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TotalsScreen.class);
+                startActivity(intent);
+            }
+        });
         return view;
     }
+
 
     private void loadResults() {
         executorService.execute(() -> {
