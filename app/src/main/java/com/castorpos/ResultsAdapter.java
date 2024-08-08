@@ -6,87 +6,72 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 
 public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHolder> {
-    private List<SavedResult> results;
-    private List<SavedResult> creditResults;
+
     private Context context;
-    private OnItemClickListener onItemClickListener;
+    private List<SavedResult> savedResults;
+    private List<SavedResult> creditResults;
 
-    public ResultsAdapter(Context context, List<SavedResult> results, List<SavedResult> creditResults) {
+    public ResultsAdapter(Context context, List<SavedResult> savedResults, List<SavedResult> creditResults) {
         this.context = context;
-        this.results = results != null ? results : new ArrayList<>(); // Ensure non-null list
-        this.creditResults = creditResults != null ? creditResults : new ArrayList<>(); // Ensure non-null list
+        this.savedResults = savedResults;
+        this.creditResults = creditResults;
     }
 
-    public interface OnItemClickListener {
-        void onItemDeleteClick(SavedResult result);
-    }
-
-    public ResultsAdapter(List<SavedResult> results, OnItemClickListener onItemClickListener) {
-        this.results = results;
-        this.onItemClickListener = onItemClickListener;
-    }
-
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.saved_result_list_item, parent, false);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.saved_result_list_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        String time = getCurrentTimeFormatted();
-        holder.savedTime.setText(time);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        SavedResult result;
+        if (position < savedResults.size()) {
+            result = savedResults.get(position);
+        } else {
+            result = creditResults.get(position - savedResults.size());
+        }
 
-        SavedResult result = results.get(position);
-        holder.resultTextView.setText(result.getResultText());
-        holder.serverNameTextView.setText(result.getServerName());
-        holder.customersTextView.setText(String.valueOf(result.getCustomers()));
+        holder.savedTime.setText(result.getTime()); // Ensure SavedResult has a getTime() method
+        holder.savedResult.setText(result.getResultText());
+        holder.savedServer.setText(result.getServerName());
+        holder.savedCustomers.setText(String.valueOf(result.getCustomers()));
 
-        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onItemClickListener.onItemDeleteClick(result);
+        holder.deleteResultButton.setOnClickListener(v -> {
+            if (position < savedResults.size()) {
+                savedResults.remove(position);
+            } else {
+                creditResults.remove(position - savedResults.size());
             }
+            notifyItemRemoved(position);
         });
-    }
-
-    private String getCurrentTimeFormatted() {
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        return sdf.format(new Date());
     }
 
     @Override
     public int getItemCount() {
-        return results.size() + creditResults.size();
+        return savedResults.size() + creditResults.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView savedTime, resultTextView, serverNameTextView, customersTextView;
-        public Button deleteButton;
+        TextView savedTime;
+        TextView savedResult;
+        TextView savedServer;
+        TextView savedCustomers;
+        Button deleteResultButton;
 
-        public ViewHolder(View view) {
-            super(view);
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
             savedTime = itemView.findViewById(R.id.saved_time);
-            resultTextView = view.findViewById(R.id.saved_result);
-            serverNameTextView = view.findViewById(R.id.saved_server);
-            customersTextView = view.findViewById(R.id.saved_customers);
-            deleteButton = view.findViewById(R.id.delete_result_button);
+            savedResult = itemView.findViewById(R.id.saved_result);
+            savedServer = itemView.findViewById(R.id.saved_server);
+            savedCustomers = itemView.findViewById(R.id.saved_customers);
+            deleteResultButton = itemView.findViewById(R.id.delete_result_button);
         }
-    }
-
-    public void addResult(SavedResult result) {
-        results.add(0, result); // Add new result at the top
-        notifyItemInserted(0);
     }
 }

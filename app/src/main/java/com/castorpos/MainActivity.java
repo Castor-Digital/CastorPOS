@@ -26,6 +26,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
 import java.text.DecimalFormat;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements ServerAdapter.OnServerClickListener {
@@ -50,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private DecimalFormat currencyFormat;
     private int numberOfCustomers = 1;;
     private String selectedServer;
+    private ExecutorService executorService;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -79,6 +86,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
+
+        executorService = Executors.newSingleThreadExecutor();
 
         PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
@@ -250,16 +259,26 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         if (validateConditions()) {
             String serverName = serverSidebarFragment.getSelectedServer();
             int customers = serverSidebarFragment.getNumberOfCustomers();
-            SavedResult savedResult = new SavedResult(resultText, serverName, customers, isCredit);
+
+            // Get the current time
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            String currentTime = sdf.format(new Date());
+
+            SavedResult savedResult = new SavedResult(resultText, serverName, customers, isCredit, currentTime);
 
             // Add result to the ResultsSidebarFragment
             resultsSidebarFragment.addResult(savedResult);
 
             // Insert result into the database on a background thread
-            //database.resultsDao().insert(savedResult);
-            AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
+            executorService.execute(() -> {
+                database.resultsDao().insert(savedResult);
+            });
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
+
+            if (!isCredit) {
+                sendSerialSignal(); // Send serial signal to open drawer only for cash results
+            }
 
             // Reset the current operand to 0.00
             operand1 = 0.00;
