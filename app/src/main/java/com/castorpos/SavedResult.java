@@ -23,7 +23,7 @@ public class SavedResult {
     public int customers;
 
     // Constructor, getters, and setters...
-    public SavedResult(String resultText, String serverName, int customers) {
+    public SavedResult(String resultText, String serverName, int customers, boolean isCredit, String currentTime) {
         this.resultText = resultText;
         this.serverName = serverName;
         this.customers = customers;

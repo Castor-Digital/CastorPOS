@@ -26,6 +26,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
 import java.text.DecimalFormat;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements ServerAdapter.OnServerClickListener {
@@ -50,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private DecimalFormat currencyFormat;
     private int numberOfCustomers = 1;;
     private String selectedServer;
+    private ExecutorService executorService;
+    private double billTotal = 0.0;
+    private double cashReceived = 0.0;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -79,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
         display = findViewById(R.id.display);
         operationDisplay = findViewById(R.id.operation_display);
+
+        executorService = Executors.newSingleThreadExecutor();
 
         PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
@@ -175,13 +186,38 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 calculateResult();
             }
         });
-        findViewById(R.id.buttonSave).setOnClickListener(new View.OnClickListener() {
+        Button buttonSave = findViewById(R.id.buttonSave);
+        buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String resultText = display.getText().toString(); // Get the result text from your display or relevant source
-                saveResult(resultText);
+                String displayValue = display.getText().toString();
+                if (!displayValue.isEmpty()) {
+                    cashReceived = Double.parseDouble(displayValue); // Store the cash received
+                    double change = cashReceived - billTotal; // Calculate the change
+
+                    display.setText(String.format("%.2f", change)); // Show change on display
+
+                    saveResult(String.valueOf(billTotal), false); // Save the original bill total to saved results
+                }
             }
         });
+
+        Button buttonCredit = findViewById(R.id.buttonCredit);
+        buttonCredit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String displayValue = display.getText().toString();
+                if (!displayValue.isEmpty()) {
+                    cashReceived = Double.parseDouble(displayValue); // Store the cash received
+                    double change = cashReceived - billTotal; // Calculate the change
+
+                    display.setText(String.format("%.2f", change)); // Show change on display
+
+                    saveResult(String.valueOf(billTotal), true); // Save the original bill total to saved results
+                }
+            }
+        });
+
         findViewById(R.id.buttonBackspace).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -191,16 +227,21 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 }
             }
         });
-        findViewById(R.id.buttonCash).setOnClickListener(new View.OnClickListener() {
+        Button buttonCash = findViewById(R.id.buttonCash);
+        buttonCash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleCashButton();
+                String displayValue = display.getText().toString();
+                if (!displayValue.isEmpty()) {
+                    displayValue = displayValue.replace("$", "");
+                    billTotal = Double.parseDouble(displayValue); // Store the bill total
+                    display.setText(""); // Clear the display for cash input
+                }
             }
         });
-        findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> {
-            addDoubleZero();
-        });
+        findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> addDoubleZero());
         findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
+
     }
 
     /* -------------------- Methods -------------------- */
@@ -233,41 +274,51 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
-    private void handleCashButton() {
-        EditText display = findViewById(R.id.display);
-        String displayText = display.getText().toString().replace("$", "");
-        if (!displayText.isEmpty()) {
-            originalAmount = Double.parseDouble(displayText);
-            display.setText("$0.00"); // Show 0.00 for cash input
-            cashMode = true;
-        }
-    }
-
     //saveResult - saves the total, server, # of customers
-    private void saveResult(String resultText) {
+    private void saveResult(String resultText, boolean isCredit) {
         if (validateConditions()) {
             String serverName = serverSidebarFragment.getSelectedServer();
             int customers = serverSidebarFragment.getNumberOfCustomers();
-            SavedResult savedResult = new SavedResult(resultText, serverName, customers);
+
+            // Calculate the change only if we are in cash mode
+            double change = 0.00;
+            if (cashMode) {
+                double cashReceived = Double.parseDouble(display.getText().toString().replace("$", ""));
+                change = cashReceived - originalAmount;
+                resultText = df.format(originalAmount); // Save the original bill total, not the change
+            }
+
+            // Get the current time
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            String currentTime = sdf.format(new Date());
+
+            SavedResult savedResult = new SavedResult(resultText, serverName, customers, isCredit, currentTime);
 
             // Add result to the ResultsSidebarFragment
             resultsSidebarFragment.addResult(savedResult);
 
             // Insert result into the database on a background thread
-            //database.resultsDao().insert(savedResult);
-            AsyncTask<SavedResult, Void, Void> execute = new InsertResultTask().execute(savedResult);
+            executorService.execute(() -> {
+                database.resultsDao().insert(savedResult);
+            });
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
-            sendSerialSignal(); //Open register on save (remove this line for testing on PC)
 
-            // Reset the current operand to 0.00
+            if (!isCredit) {
+                sendSerialSignal(); // Send serial signal to open drawer only for cash results
+            }
+
+            // Reset the current operand and display
             operand1 = 0.00;
             operand2 = 0.00;
-            currentInput.setLength(0); // Clear the current input
-            display.setText(df.format(0.00)); // Update the display to show 0.00
-            display.setTextColor(Color.parseColor("#222222"));
-            }
+            currentInput.setLength(0);
+            display.setText(df.format(change)); // Show the change on the display
+            display.setTextColor(Color.parseColor("#006400")); // Change color to indicate positive change
+
+            cashMode = false; // Reset cash mode after saving the result
+        }
     }
+
 
     //InsertResultTask - for saveResult
     private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
