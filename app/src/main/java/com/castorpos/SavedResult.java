@@ -24,12 +24,16 @@ public class SavedResult {
     @ColumnInfo(name = "is_credit")
     public boolean isCredit; // to differentiate between cash and credit results
 
-    public SavedResult(String resultText, String serverName, int customers, boolean isCredit) {
+    @ColumnInfo(name = "time")
+    private String time;
+
+    public SavedResult(String resultText, String serverName, int customers, boolean isCredit, String time) {
         this.resultText = resultText;
         this.serverName = serverName;
         this.customers = customers;
         this.isCredit = isCredit;
         this.amount = parseAmount(resultText);
+        this.time = time;
     }
 
     private double parseAmount(String resultText) {
@@ -57,4 +61,9 @@ public class SavedResult {
     public boolean isCredit() {
         return isCredit;
     }
+
+    public String getTime() {
+        return time;
+    }
+
 }
