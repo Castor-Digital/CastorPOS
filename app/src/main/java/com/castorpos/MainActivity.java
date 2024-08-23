@@ -57,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private int numberOfCustomers = 1;;
     private String selectedServer;
     private ExecutorService executorService;
-    private double billTotal = 0.0;
-    private double cashReceived = 0.0;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -174,6 +172,12 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 setOperation("*");
             }
         });
+        findViewById(R.id.buttonCash).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setOperation("$");
+            }
+        });
         findViewById(R.id.buttonClear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,15 +194,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String displayValue = display.getText().toString();
-                if (!displayValue.isEmpty()) {
-                    cashReceived = Double.parseDouble(displayValue); // Store the cash received
-                    double change = cashReceived - billTotal; // Calculate the change
-
-                    display.setText(String.format("%.2f", change)); // Show change on display
-
-                    saveResult(String.valueOf(billTotal), false); // Save the original bill total to saved results
-                }
+                String resultText = display.getText().toString(); // Get the result text from your display or relevant source
+                saveResult(resultText, false);
             }
         });
 
@@ -206,15 +203,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         buttonCredit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String displayValue = display.getText().toString();
-                if (!displayValue.isEmpty()) {
-                    cashReceived = Double.parseDouble(displayValue); // Store the cash received
-                    double change = cashReceived - billTotal; // Calculate the change
-
-                    display.setText(String.format("%.2f", change)); // Show change on display
-
-                    saveResult(String.valueOf(billTotal), true); // Save the original bill total to saved results
-                }
+                String resultText = display.getText().toString(); // Get the result text from your display or relevant source
+                saveResult(resultText, true);
             }
         });
 
@@ -227,18 +217,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 }
             }
         });
-        Button buttonCash = findViewById(R.id.buttonCash);
-        buttonCash.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String displayValue = display.getText().toString();
-                if (!displayValue.isEmpty()) {
-                    displayValue = displayValue.replace("$", "");
-                    billTotal = Double.parseDouble(displayValue); // Store the bill total
-                    display.setText(""); // Clear the display for cash input
-                }
-            }
-        });
+
         findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> addDoubleZero());
         findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
 
@@ -313,19 +292,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             operand2 = 0.00;
             currentInput.setLength(0);
             display.setText(df.format(change)); // Show the change on the display
-            display.setTextColor(Color.parseColor("#006400")); // Change color to indicate positive change
-
-            cashMode = false; // Reset cash mode after saving the result
-        }
-    }
-
-
-    //InsertResultTask - for saveResult
-    private class InsertResultTask extends AsyncTask<SavedResult, Void, Void> {
-        @Override
-        protected Void doInBackground(SavedResult... results) {
-            database.resultsDao().insert(results[0]);
-            return null;
         }
     }
 
@@ -365,14 +331,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         return true;
     }
 
-    private void appendDigit(String digit) {
-        if (digit.equals(".") && currentInput.toString().contains(".")) {
-            return; // Prevent multiple decimal points
-        }
-        currentInput.append(digit);
-        updateDisplay();
-    }
-
     //updateDisplay - sets the calculator display
     private void updateDisplay() {
         if (currentInput.length() == 0) {
@@ -388,6 +346,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         display.setText(df.format(valueInDollars));
         display.setTextColor(Color.parseColor("#222222"));
     }
+
 
     //setOperation - sets the math operation based on input
     private void setOperation(String operation) {
@@ -420,6 +379,9 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                     break;
                 case "*":
                     result = operand1 * operand2;
+                    break;
+                case "$":
+                    result = Math.abs(operand1 - operand2);
                     break;
                 default:
                     return;
@@ -462,16 +424,20 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
     //addDoubleZero - appends 00, for dollar amounts or math operations
     private void addDoubleZero() {
-        String currentAmount = display.getText().toString().replace("$", "").replace(",", "");
-        try {
-            double amount = Double.parseDouble(currentAmount);
-            amount *= 100; // Shift the decimal two places to the right
-            display.setText(String.format("$%,.2f", amount));
-            currentOperand = amount; // Update the current operand
-        } catch (NumberFormatException e) {
-            display.setText("$0.00");
-            currentOperand = 0.00;
+        String displayText = display.getText().toString().replace("$", "");
+        if (!displayText.isEmpty()) {
+            try {
+                currentOperand = Double.parseDouble(displayText);
+                currentOperand = currentOperand * 100;
+
+                //had to manually append both 0's for now. Works
+                currentInput.append(0);
+                currentInput.append(0);
+
+                display.setText(currencyFormat.format(currentOperand));
+            } catch (NumberFormatException e) {
+                display.setText(currencyFormat.format(0.00));
+            }
         }
     }
-
 }
