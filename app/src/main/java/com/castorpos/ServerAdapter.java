@@ -33,6 +33,7 @@ public class ServerAdapter extends RecyclerView.Adapter<ServerAdapter.ServerView
         //Hide the X just for To-Go and Gift Certificate servers
         if ("To-Go".equals(server) || "Gift Certificate".equals(server)) {
             holder.deleteServerButton.setVisibility(View.GONE);
+
         } else {
             holder.deleteServerButton.setVisibility(View.VISIBLE);
         }

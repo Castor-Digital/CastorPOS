@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -37,8 +35,6 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity implements ServerAdapter.OnServerClickListener {
     private ResultsSidebarFragment resultsSidebarFragment;
     private ServerSidebarFragment serverSidebarFragment;
-    private double originalAmount = 0.0;
-    private boolean cashMode = false;
 
     private static final String TAG = "MainActivity";
     private static final String ACTION_USB_PERMISSION = "com.android.castorpos.USB_PERMISSION";
@@ -270,14 +266,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             String serverName = serverSidebarFragment.getSelectedServer();
             int customers = serverSidebarFragment.getNumberOfCustomers();
 
-            // Calculate the change only if we are in cash mode
-            double change = 0.00;
-            if (cashMode) {
-                double cashReceived = Double.parseDouble(display.getText().toString().replace("$", ""));
-                change = cashReceived - originalAmount;
-                resultText = df.format(originalAmount); // Save the original bill total, not the change
-            }
-
             // Get the current time
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             String currentTime = sdf.format(new Date());
@@ -302,7 +290,8 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             operand1 = 0.00;
             operand2 = 0.00;
             currentInput.setLength(0);
-            display.setText(df.format(change)); // Show the change on the display
+            currencyFormat = new DecimalFormat("$0.00");
+            display.setText("$0.00");
         }
     }
 

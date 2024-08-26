@@ -92,6 +92,11 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).onServerSelected(server);
         }
+
+        //Customer count set to 1 by default for To-Go's + Gift certificates
+        if (selectedServer == "To-Go" || selectedServer == "Gift Certificate"){
+            updateNumberOfCustomers(1);
+        }
     }
 
     @Override
@@ -119,8 +124,10 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
 
     public int getNumberOfCustomers() {
         String customers = customersInputEditText.getText().toString();
+
+        //Number of customers set to 1 by default
         if (customers.isEmpty()) {
-            return 0;
+            return 1;
         }
         return Integer.parseInt(customers);
     }
