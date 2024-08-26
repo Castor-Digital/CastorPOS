@@ -82,16 +82,37 @@ public class ResultsSidebarFragment extends Fragment {
         }
     }
 
-    public void clearResults() {
-        executorService.execute(() -> {
-            database.resultsDao().deleteAll();
+    public void refreshSidebar() {
+        new Thread(() -> {
+            // Fetch fresh data from the database
+            List<SavedResult> freshResults = AppDatabase.getDatabase(getContext()).resultsDao().getAllResults();
+
+            // Update the adapter on the UI thread
             getActivity().runOnUiThread(() -> {
-                savedResults.clear();
-                creditResults.clear();
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
-                }
+                adapter.setResults(freshResults);
+                adapter.notifyDataSetChanged();
             });
-        });
+        }).start();
     }
+
+
+    // Method to delete result from the database and the sidebar
+    public void deleteResult(SavedResult result) {
+        // Remove from the database
+        AppDatabase database = AppDatabase.getDatabase(getContext());
+        ResultsDao resultsDao = database.resultsDao();
+
+        new Thread(() -> {
+            resultsDao.delete(result);
+
+            // Run on UI thread to update the sidebar
+            getActivity().runOnUiThread(() -> {
+                adapter.removeResult(result);
+            });
+        }).start();
+    }
+
+
+
+
 }

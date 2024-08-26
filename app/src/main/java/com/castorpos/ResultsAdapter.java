@@ -74,4 +74,23 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
             deleteResultButton = itemView.findViewById(R.id.delete_result_button);
         }
     }
+
+    public void removeResult(SavedResult result) {
+        // Check if the result is in the savedResults list and remove it
+        if (savedResults.contains(result)) {
+            savedResults.remove(result);
+        }
+        // Check if the result is in the creditResults list and remove it
+        else if (creditResults.contains(result)) {
+            creditResults.remove(result);
+        }
+        // Notify the adapter that the data set has changed
+        notifyDataSetChanged();
+    }
+
+    public void setResults(List<SavedResult> results) {
+        this.savedResults.clear();
+        this.savedResults.addAll(results);
+        notifyDataSetChanged();
+    }
 }

@@ -77,6 +77,17 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     };
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Find the ResultsSidebarFragment and trigger a refresh
+        ResultsSidebarFragment sidebarFragment = (ResultsSidebarFragment) getSupportFragmentManager().findFragmentById(R.id.results_sidebar_container);
+        if (sidebarFragment != null) {
+            sidebarFragment.refreshSidebar();
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         getSupportActionBar().hide();
         super.onCreate(savedInstanceState);

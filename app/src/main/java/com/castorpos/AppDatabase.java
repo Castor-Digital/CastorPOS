@@ -9,6 +9,7 @@ import android.content.Context;
 
 @Database(entities = {SavedResult.class}, version = 3, exportSchema = false) // Increment version number to 3
 public abstract class AppDatabase extends RoomDatabase {
+
     public abstract ResultsDao resultsDao();
 
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
