@@ -37,13 +37,14 @@ public class TotalsScreen extends AppCompatActivity {
         // Set clear data button click listener
         clearDataButton.setOnClickListener(v -> clearAllData());
     }
-
+/*
     @Override
     protected void onResume() {
         super.onResume();
         // Refresh totals every time the screen is resumed
         loadTotals();
     }
+    */
 
     private void loadTotals() {
         executorService.execute(() -> {

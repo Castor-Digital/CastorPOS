@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +20,8 @@ import java.util.List;
 public class ResultsSidebarFragment extends Fragment {
     private RecyclerView recyclerView;
     private ResultsAdapter adapter;
-    private List<SavedResult> savedResults = new ArrayList<>();
-    private List<SavedResult> creditResults = new ArrayList<>();
+    private static List<SavedResult> savedResults = new ArrayList<>();
+    private static List<SavedResult> creditResults = new ArrayList<>();
     private AppDatabase database;
     private ExecutorService executorService;
 
@@ -31,7 +33,7 @@ public class ResultsSidebarFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         database = AppDatabase.getDatabase(getContext());
         executorService = Executors.newSingleThreadExecutor();
-        adapter = new ResultsAdapter(getContext(), savedResults, creditResults);
+        adapter = new ResultsAdapter(getContext(), savedResults, creditResults, this);
         recyclerView.setAdapter(adapter);
         loadResults();
 
@@ -47,39 +49,31 @@ public class ResultsSidebarFragment extends Fragment {
 
 
     private void loadResults() {
-        executorService.execute(() -> {
-            List<SavedResult> results = database.resultsDao().getAllResults();
-            if (results != null) {
-                savedResults.clear();
-                creditResults.clear();
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<SavedResult> results = database.resultsDao().getAllResults();
 
-                for (SavedResult result : results) {
-                    if (result.isCredit()) {
-                        creditResults.add(result);
-                    } else {
-                        savedResults.add(result);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.setResults(results);
                     }
-                }
-
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
-                }
+                });
             }
         });
     }
 
-    public void addResult(SavedResult result) {
-        if (result.isCredit()) {
-            creditResults.add(result);
-            if (adapter != null) {
-                adapter.notifyItemInserted(creditResults.size() - 1);
+    public void saveResult(SavedResult result) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                int count = database.resultsDao().resultExists(result.getTime());
+                if (count == 0) { // Insert only if the result does not exist
+                    database.resultsDao().insert(result);
+                }
             }
-        } else {
-            savedResults.add(result);
-            if (adapter != null) {
-                adapter.notifyItemInserted(savedResults.size() - 1);
-            }
-        }
+        });
     }
 
     public void refreshSidebar() {
@@ -95,24 +89,45 @@ public class ResultsSidebarFragment extends Fragment {
         }).start();
     }
 
-
-    // Method to delete result from the database and the sidebar
     public void deleteResult(SavedResult result) {
-        // Remove from the database
+        int position = -1;
+
+        // Check if the result is in the savedResults list and remove it
+        if (savedResults.contains(result)) {
+            position = savedResults.indexOf(result);
+            savedResults.remove(result);
+        }
+        // Check if the result is in the creditResults list and remove it
+        else if (creditResults.contains(result)) {
+            position = savedResults.size() + creditResults.indexOf(result);
+            creditResults.remove(result);
+        }
+
+        // Remove the result from the database
         AppDatabase database = AppDatabase.getDatabase(getContext());
         ResultsDao resultsDao = database.resultsDao();
 
+        final int finalPosition = position;
         new Thread(() -> {
             resultsDao.delete(result);
 
-            // Run on UI thread to update the sidebar
-            getActivity().runOnUiThread(() -> {
-                adapter.removeResult(result);
-            });
+            // Run on UI thread to update the adapter and sidebar
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (adapter != null) {
+                        if (finalPosition != -1) {
+                            adapter.notifyItemRemoved(finalPosition);
+                        } else {
+                            adapter.notifyDataSetChanged();
+                        }
+                    } else {
+                        Log.e("ResultsSidebarFragment", "Adapter is null.");
+                    }
+                });
+            } else {
+                Log.e("ResultsSidebarFragment", "Activity is null.");
+            }
         }).start();
     }
-
-
-
 
 }

@@ -29,4 +29,9 @@ public interface ResultsDao {
 
     @Query("SELECT * FROM saved_results WHERE is_credit = :isCredit")
     List<SavedResult> getResultsByType(boolean isCredit);
+
+    // New method to check if a result already exists
+    @Query("SELECT COUNT(*) FROM saved_results WHERE time = :time")
+    int resultExists(String time); // Assuming 'timestamp' is a unique identifier for each result
 }
+

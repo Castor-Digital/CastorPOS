@@ -72,16 +72,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     };
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Find the ResultsSidebarFragment and trigger a refresh
-        ResultsSidebarFragment sidebarFragment = (ResultsSidebarFragment) getSupportFragmentManager().findFragmentById(R.id.results_sidebar_container);
-        if (sidebarFragment != null) {
-            sidebarFragment.refreshSidebar();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             public void onClick(View v) {
                 String resultText = display.getText().toString(); // Get the result text from your display or relevant source
                 saveResult(resultText, false);
+                resultsSidebarFragment.refreshSidebar();
             }
         });
 
@@ -212,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             public void onClick(View v) {
                 String resultText = display.getText().toString(); // Get the result text from your display or relevant source
                 saveResult(resultText, true);
+                resultsSidebarFragment.refreshSidebar();
             }
         });
 
@@ -228,6 +220,13 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> addDoubleZero());
         findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ResultsSidebarFragment sidebarFragment = (ResultsSidebarFragment) getSupportFragmentManager().findFragmentById(R.id.results_sidebar_container);
+        sidebarFragment.refreshSidebar();
     }
 
     /* -------------------- Methods -------------------- */
@@ -272,19 +271,24 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
             SavedResult savedResult = new SavedResult(resultText, serverName, customers, isCredit, currentTime);
 
-            // Add result to the ResultsSidebarFragment
-            resultsSidebarFragment.addResult(savedResult);
-
             // Insert result into the database on a background thread
             executorService.execute(() -> {
                 database.resultsDao().insert(savedResult);
             });
 
+            runOnUiThread(() -> {
+                ResultsSidebarFragment sidebarFragment = (ResultsSidebarFragment) getSupportFragmentManager().findFragmentById(R.id.results_sidebar_container);
+                sidebarFragment.refreshSidebar();
+            });
+
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
 
-            if (!isCredit) {
-                sendSerialSignal(); // Send serial signal to open drawer only for cash results
-            }
+
+
+//            if (!isCredit) {
+//                sendSerialSignal(); // Send serial signal to open drawer only for cash results
+//            }
+
 
             // Reset the current operand and display
             operand1 = 0.00;
