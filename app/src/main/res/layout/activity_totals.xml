@@ -7,10 +7,10 @@
     android:background="#EEEEEE">
 
     <TextView
-        android:id="@+id/totalRevenueTextView"
+        android:id="@+id/totalCashRevenueTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total Cash Revenue: $0.00"
+        android:text="Cash Revenue: $0.00"
         android:textSize="24sp"
         android:textColor="#000000"/>
 
@@ -18,7 +18,15 @@
         android:id="@+id/totalCCRevenueTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total Credit Card Revenue: N/A"
+        android:text="Credit Card Revenue: $0.00"
+        android:textSize="24sp"
+        android:textColor="#000000"/>
+
+    <TextView
+        android:id="@+id/totalRevenueTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total Revenue: $0.00"
         android:textSize="24sp"
         android:textColor="#000000"/>
 

@@ -11,8 +11,10 @@ import java.util.concurrent.Executors;
 
 public class TotalsScreen extends AppCompatActivity {
 
-    private TextView totalRevenueTextView;
+    private TextView totalCashRevenueTextView;
     private TextView totalCreditRevenueTextView;
+    private TextView totalRevenueTextView;
+
     private Button clearDataButton;
     private AppDatabase database;
     private ExecutorService executorService;
@@ -23,8 +25,10 @@ public class TotalsScreen extends AppCompatActivity {
         setContentView(R.layout.activity_totals);
 
         // Initialize views
-        totalRevenueTextView = findViewById(R.id.totalRevenueTextView);
+        totalCashRevenueTextView = findViewById(R.id.totalCashRevenueTextView);
         totalCreditRevenueTextView = findViewById(R.id.totalCCRevenueTextView);
+        totalRevenueTextView = findViewById(R.id.totalRevenueTextView);
+
         clearDataButton = findViewById(R.id.clearDataButton);
 
         // Initialize database and executor
@@ -49,7 +53,7 @@ public class TotalsScreen extends AppCompatActivity {
     private void loadTotals() {
         executorService.execute(() -> {
             List<SavedResult> allResults = database.resultsDao().getAllResults();
-            double totalRevenue = 0;
+            double totalCashRevenue = 0;
             double totalCreditRevenue = 0;
 
             // Calculate totals
@@ -57,16 +61,18 @@ public class TotalsScreen extends AppCompatActivity {
                 if (result.isCredit()) {
                     totalCreditRevenue += result.getAmount();
                 } else {
-                    totalRevenue += result.getAmount();
+                    totalCashRevenue += result.getAmount();
                 }
             }
 
             // Update the UI on the main thread
-            double finalTotalRevenue = totalRevenue;
+            double finalTotalCashRevenue = totalCashRevenue;
             double finalTotalCreditRevenue = totalCreditRevenue;
+            double finalTotalRevenue = (totalCashRevenue + totalCreditRevenue);
             runOnUiThread(() -> {
+                totalCashRevenueTextView.setText(String.format("Cash Revenue: $%.2f", finalTotalCashRevenue));
+                totalCreditRevenueTextView.setText(String.format("Credit Revenue: $%.2f", finalTotalCreditRevenue));
                 totalRevenueTextView.setText(String.format("Total Revenue: $%.2f", finalTotalRevenue));
-                totalCreditRevenueTextView.setText(String.format("Total Credit Revenue: $%.2f", finalTotalCreditRevenue));
             });
         });
     }
