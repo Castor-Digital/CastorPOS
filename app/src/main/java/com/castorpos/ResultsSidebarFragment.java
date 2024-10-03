@@ -1,3 +1,4 @@
+
 package com.castorpos;
 
 import android.content.Intent;
@@ -31,10 +32,11 @@ public class ResultsSidebarFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         database = AppDatabase.getDatabase(getContext());
         executorService = Executors.newSingleThreadExecutor();
-        adapter = new ResultsAdapter(getContext(), savedResults, creditResults);
+        adapter = new ResultsAdapter(getContext(), savedResults, creditResults, database, executorService);
         recyclerView.setAdapter(adapter);
-        loadResults();
+        loadResults();  // Load and display results
 
+        // Navigate to TotalsScreen
         view.findViewById(R.id.buttonTotalsScreen).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -45,52 +47,27 @@ public class ResultsSidebarFragment extends Fragment {
         return view;
     }
 
-
-    private void loadResults() {
+    // Fetch results from the database and refresh the RecyclerView
+    void loadResults() {
         executorService.execute(() -> {
-            List<SavedResult> results = database.resultsDao().getAllResults();
-            savedResults.clear();
-            creditResults.clear();
-
-            for (SavedResult result : results) {
-                if (result.isCredit()) {
-                    creditResults.add(result);
-                } else {
-                    savedResults.add(result); // This will handle cash results
-                }
-            }
+            // Fetch cash and credit results from the database
+            List<SavedResult> cashResults = database.resultsDao().getCashResults();
+            List<SavedResult> loadedCreditResults = database.resultsDao().getCreditResults();
 
             getActivity().runOnUiThread(() -> {
+                // First, clear the lists but only before repopulating to ensure we are not reassigning
+                savedResults.clear();
+                creditResults.clear();
+
+                // Add the fetched results to the existing lists
+                savedResults.addAll(cashResults);
+                creditResults.addAll(loadedCreditResults);
+
+                // Notify the adapter that the data has changed
                 adapter.notifyDataSetChanged();
             });
         });
     }
 
 
-    public void addResult(SavedResult result) {
-        if (result.isCredit()) {
-            creditResults.add(result);
-            if (adapter != null) {
-                adapter.notifyItemInserted(creditResults.size() - 1);
-            }
-        } else {
-            savedResults.add(result);
-            if (adapter != null) {
-                adapter.notifyItemInserted(savedResults.size() - 1);
-            }
-        }
-    }
-
-    public void clearResults() {
-        executorService.execute(() -> {
-            database.resultsDao().deleteAll();
-            getActivity().runOnUiThread(() -> {
-                savedResults.clear();
-                creditResults.clear();
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
-                }
-            });
-        });
-    }
 }
