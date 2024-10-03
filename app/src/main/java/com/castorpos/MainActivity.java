@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
         }
     }
 
-    //saveResult - saves the total, server, # of customers
+    // saveResult - saves the total, server, # of customers
     private void saveResult(String resultText, boolean isCredit) {
         if (validateConditions()) {
             String serverName = serverSidebarFragment.getSelectedServer();
@@ -271,29 +271,34 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             String currentTime = sdf.format(new Date());
 
+            // Create a new SavedResult object
             SavedResult savedResult = new SavedResult(resultText, serverName, customers, isCredit, currentTime);
 
-            // Add result to the ResultsSidebarFragment
-            resultsSidebarFragment.addResult(savedResult);
-
-            // Insert result into the database on a background thread
+            // Insert the result into the database on a background thread
             executorService.execute(() -> {
-                database.resultsDao().insert(savedResult);
+                database.resultsDao().insert(savedResult);  // Use your ResultsDao insert method
+
+                // Reload the results on the ResultsSidebarFragment after inserting
+                runOnUiThread(() -> {
+                    resultsSidebarFragment.loadResults();  // Reload results in sidebar
+                });
             });
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
 
-            //if (!isCredit) {
-            //    sendSerialSignal(); // Send serial signal to open drawer only for cash results
-            //}
+            // If applicable, send a signal to open the cash drawer for cash payments
+            // if (!isCredit) {
+            //    sendSerialSignal();  // Send signal to open drawer for cash results
+            // }
 
             // Reset the current operand and display
             operand1 = 0.00;
             operand2 = 0.00;
             currentInput.setLength(0);
-            display.setText(df.format(change)); // Show the change on the display
+            display.setText(df.format(change));  // Show the change on the display
         }
     }
+
 
     @Override
     public void onServerSelected(String server) {

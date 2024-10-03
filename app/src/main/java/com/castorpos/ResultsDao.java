@@ -15,6 +15,9 @@ public interface ResultsDao {
     @Query("SELECT * FROM saved_results WHERE is_credit = 0")
     List<SavedResult> getCashResults();
 
+    @Query("SELECT * FROM saved_results WHERE is_credit = 1")
+    List<SavedResult> getCreditResults();
+
     @Insert
     void insert(SavedResult result);
 
@@ -32,4 +35,6 @@ public interface ResultsDao {
 
     @Query("SELECT * FROM saved_results WHERE is_credit = :isCredit")
     List<SavedResult> getResultsByType(boolean isCredit);
+
+
 }

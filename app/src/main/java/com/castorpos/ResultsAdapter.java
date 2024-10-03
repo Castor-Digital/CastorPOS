@@ -1,3 +1,4 @@
+
 package com.castorpos;
 
 import android.content.Context;
@@ -9,17 +10,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHolder> {
 
     private Context context;
     private List<SavedResult> savedResults;
     private List<SavedResult> creditResults;
+    private AppDatabase database;  // Add database reference for deletion
+    private ExecutorService executorService;  // For background thread execution
 
-    public ResultsAdapter(Context context, List<SavedResult> savedResults, List<SavedResult> creditResults) {
+    public ResultsAdapter(Context context, List<SavedResult> savedResults, List<SavedResult> creditResults, AppDatabase database, ExecutorService executorService) {
         this.context = context;
         this.savedResults = savedResults;
         this.creditResults = creditResults;
+        this.database = database;  // Initialize database
+        this.executorService = executorService;  // Initialize ExecutorService
     }
 
     @NonNull
@@ -38,18 +44,28 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
             result = creditResults.get(position - savedResults.size());
         }
 
-        holder.savedTime.setText(result.getTime()); // Ensure SavedResult has a getTime() method
+        // Bind data to view elements
+        holder.savedTime.setText(result.getTime());
         holder.savedResult.setText(result.getResultText());
         holder.savedServer.setText(result.getServerName());
         holder.savedCustomers.setText(String.valueOf(result.getCustomers()));
 
+        // Set up the delete button functionality
         holder.deleteResultButton.setOnClickListener(v -> {
+            // Remove the result from the RecyclerView list
             if (position < savedResults.size()) {
                 savedResults.remove(position);
             } else {
                 creditResults.remove(position - savedResults.size());
             }
+
+            // Notify the adapter of the removal
             notifyItemRemoved(position);
+
+            // Remove the result from the database in the background
+            executorService.execute(() -> {
+                database.resultsDao().delete(result);  // Delete the result from the database
+            });
         });
     }
 
