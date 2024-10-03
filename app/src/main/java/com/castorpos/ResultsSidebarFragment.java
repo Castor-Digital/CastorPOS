@@ -49,24 +49,23 @@ public class ResultsSidebarFragment extends Fragment {
     private void loadResults() {
         executorService.execute(() -> {
             List<SavedResult> results = database.resultsDao().getAllResults();
-            if (results != null) {
-                savedResults.clear();
-                creditResults.clear();
+            savedResults.clear();
+            creditResults.clear();
 
-                for (SavedResult result : results) {
-                    if (result.isCredit()) {
-                        creditResults.add(result);
-                    } else {
-                        savedResults.add(result);
-                    }
-                }
-
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
+            for (SavedResult result : results) {
+                if (result.isCredit()) {
+                    creditResults.add(result);
+                } else {
+                    savedResults.add(result); // This will handle cash results
                 }
             }
+
+            getActivity().runOnUiThread(() -> {
+                adapter.notifyDataSetChanged();
+            });
         });
     }
+
 
     public void addResult(SavedResult result) {
         if (result.isCredit()) {

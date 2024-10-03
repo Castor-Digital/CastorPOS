@@ -12,6 +12,9 @@ public interface ResultsDao {
     @Query("SELECT * FROM saved_results")
     List<SavedResult> getAllResultsDirect();
 
+    @Query("SELECT * FROM saved_results WHERE is_credit = 0")
+    List<SavedResult> getCashResults();
+
     @Insert
     void insert(SavedResult result);
 

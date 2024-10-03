@@ -283,9 +283,9 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
 
-            if (!isCredit) {
-                sendSerialSignal(); // Send serial signal to open drawer only for cash results
-            }
+            //if (!isCredit) {
+            //    sendSerialSignal(); // Send serial signal to open drawer only for cash results
+            //}
 
             // Reset the current operand and display
             operand1 = 0.00;

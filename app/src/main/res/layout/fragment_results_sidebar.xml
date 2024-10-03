@@ -23,7 +23,7 @@
         android:layout_weight="1"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"
-        android:background="#FFFFFF"
+        android:background="@drawable/rounded_background"
         android:padding="8dp"
         android:layout_marginBottom="8dp" />
 
@@ -34,19 +34,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#FFFFFF"
+        android:background="@drawable/rounded_background"
         android:textStyle="bold"
         android:padding="2dp">
 
         <Button
             android:id="@+id/buttonTotalsScreen"
             style="@style/CalculatorButton"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="#012741"
             android:text="Totals" />
+
+        <Button
+            android:id="@+id/buttonWaitList"
+            style="@style/CalculatorButton"
+            android:textSize="16sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#012741"
+            android:text="WaitList" />
+
+        <Button
+            android:id="@+id/buttonSettingsScreen"
+            style="@style/CalculatorButton"
+            android:textSize="16sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:backgroundTint="#012741"
+            android:text="⚙️" />
 
     </LinearLayout>
 

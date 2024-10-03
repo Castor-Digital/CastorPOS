@@ -15,17 +15,20 @@ public class TotalsScreen extends AppCompatActivity {
 
     private TextView totalRevenueTextView;
     private TextView totalCreditRevenueTextView;
+    private TextView totalCashRevenueTextView;
     private Button clearDataButton;
     private AppDatabase database;
     private ExecutorService executorService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_totals);
 
-        totalRevenueTextView = findViewById(R.id.totalRevenueTextView);
+        totalCashRevenueTextView = findViewById(R.id.totalCashRevenueTextView);
         totalCreditRevenueTextView = findViewById(R.id.totalCCRevenueTextView);
+        totalRevenueTextView = findViewById(R.id.totalRevenueTextView);
         clearDataButton = findViewById(R.id.clearDataButton);
 
         database = AppDatabase.getDatabase(getApplicationContext());
@@ -37,28 +40,32 @@ public class TotalsScreen extends AppCompatActivity {
     private void loadTotals() {
         executorService.execute(() -> {
             List<SavedResult> allResults = database.resultsDao().getAllResults();
-            double totalRevenue = 0.0;
-            double totalCreditRevenue = 0.0;
+            double totalCashRevenue = 0;
+            double totalCreditRevenue = 0;
+            double totalRevenue = 0;
 
             for (SavedResult result : allResults) {
-                String resultText = result.getResultText().replace("$", "").replace(",", "");
-                double amount = Double.parseDouble(resultText);
+                double amount = result.getAmount();
                 if (result.isCredit()) {
                     totalCreditRevenue += amount;
                 } else {
-                    totalRevenue += amount;
+                    totalCashRevenue += amount;
                 }
+                totalRevenue += amount;
             }
 
-            final double finalTotalRevenue = totalRevenue;
+            final double finalTotalCashRevenue = totalCashRevenue;
             final double finalTotalCreditRevenue = totalCreditRevenue;
+            final double finalTotalRevenue = totalRevenue;
 
             runOnUiThread(() -> {
+                totalCashRevenueTextView.setText(String.format("Cash Revenue: $%.2f", finalTotalCashRevenue));
+                totalCreditRevenueTextView.setText(String.format("Credit Card Revenue: $%.2f", finalTotalCreditRevenue));
                 totalRevenueTextView.setText(String.format("Total Revenue: $%.2f", finalTotalRevenue));
-                totalCreditRevenueTextView.setText(String.format("Total Credit Card Revenue: $%.2f", finalTotalCreditRevenue));
             });
         });
     }
+
 
     private void clearAllData() {
         executorService.execute(() -> {

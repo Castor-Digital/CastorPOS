@@ -1,52 +1,116 @@
-<!-- activity_totals.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#EEEEEE">
+    android:background="#EEEEEE"
+    android:gravity="center_horizontal">
 
-    <TextView
-        android:id="@+id/totalRevenueTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Total Cash Revenue: $0.00"
-        android:textSize="24sp"
-        android:textColor="#000000"/>
-
-    <TextView
-        android:id="@+id/totalCCRevenueTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Total Credit Card Revenue: N/A"
-        android:textSize="24sp"
-        android:textColor="#000000"/>
-
-    <Button
-        android:id="@+id/clearDataButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Clear All Data"
-        android:background="#D2042D"
-        android:textColor="#FFFFFF"
-        android:padding="4dp"
-        android:layout_marginTop="20dp"/>
-
-    <!-- Section for results by server -->
-    <TextView
-        android:id="@+id/resultsByServerTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Results by Server"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#222222"
-        android:layout_marginTop="20dp"/>
-
+    <!-- Centered container for all content -->
     <LinearLayout
-        android:id="@+id/serverResultsContainer"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#222222"
-        android:orientation="vertical"/>
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/totalResultsMenuTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Results Menu"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="20dp"
+            android:textAlignment="center"/>
+
+        <!-- Buttons to save and clear the results with rounded corners -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/rounded_background"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/totalCashRevenueTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Cash Revenue: $0.00"
+                android:textColor="#000000"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/totalCCRevenueTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Credit Card Revenue: $0.00"
+                android:textColor="#000000"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/totalRevenueTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Revenue: $0.00"
+                android:textColor="#000000"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/rounded_background"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/saveDataButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Save Today's Results "
+                android:background="@drawable/rounded_button_green"
+                android:textColor="#FFFFFF"
+                android:padding="8dp"
+                android:layout_marginRight="16dp"/>
+
+            <Button
+                android:id="@+id/clearDataButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Clear All Results "
+                android:background="@drawable/rounded_button_red"
+                android:textColor="#FFFFFF"
+                android:padding="8dp"/>
+        </LinearLayout>
+
+        <!-- Revenue data with rounded corners -->
+
+        <TextView
+            android:id="@+id/resultsByServerTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Results by Staff"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:textAlignment="center"/>
+
+        <!-- Server Results with rounded corners -->
+        <LinearLayout
+            android:id="@+id/serverResultsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_background"
+            android:padding="12dp"
+            android:gravity="center"/>
+    </LinearLayout>
 </LinearLayout>

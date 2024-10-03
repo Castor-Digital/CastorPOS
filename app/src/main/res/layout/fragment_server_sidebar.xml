@@ -23,7 +23,7 @@
         android:layout_weight="1"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"
-        android:background="#FFFFFF"
+        android:background="@drawable/rounded_background"
         android:padding="8dp"
         android:layout_marginBottom="8dp" />
 
@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#FFFFFF"
+        android:background="@drawable/rounded_background"
         android:padding="8dp"
         android:layout_marginBottom="8dp">
 
@@ -61,7 +61,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#FFFFFF"
+        android:background="@drawable/rounded_background"
         android:padding="8dp">
 
         <TextView
@@ -91,7 +91,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#FFFFFF"
+            android:background="@drawable/rounded_background"
             android:textStyle="bold"
             android:padding="2dp">
 
