@@ -56,6 +56,9 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
         c3.setOnClickListener(v -> updateNumberOfCustomers(3));
         c4.setOnClickListener(v -> updateNumberOfCustomers(4));
 
+        // Set default number of customers to 1
+        customersInputEditText.setText("1");
+
         addButton.setOnClickListener(v -> {
             addServer();
         });
@@ -89,6 +92,9 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
     @Override
     public void onServerSelected(String server) {
         selectedServer = server;
+        // Lock number of customers to 1 if the selected server is "To-Go" or "Gift Certificate"
+        updateCustomersBasedOnServerType(selectedServer);
+
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).onServerSelected(server);
         }
@@ -123,5 +129,17 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
             return 0;
         }
         return Integer.parseInt(customers);
+    }
+
+    // Method to lock or allow editing of the number of customers based on the server type
+    private void updateCustomersBasedOnServerType(String serverName) {
+        if (serverName.equalsIgnoreCase("To-Go") || serverName.equalsIgnoreCase("Gift Certificate")) {
+            // Lock the number of customers to 1 and disable editing
+            customersInputEditText.setText("1");
+            customersInputEditText.setEnabled(false);
+        } else {
+            // Allow editing for other server names
+            customersInputEditText.setEnabled(true);
+        }
     }
 }

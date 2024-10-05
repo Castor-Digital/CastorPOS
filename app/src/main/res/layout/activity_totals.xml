@@ -2,7 +2,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="32dp"
     android:background="#EEEEEE"
     android:gravity="center_horizontal">
 
@@ -76,7 +76,7 @@
                 android:layout_marginRight="16dp"
                 android:background="@drawable/rounded_button_green"
                 android:padding="4dp"
-                android:text=" Save Today "
+                android:text=" Save Report "
                 android:textColor="#FFFFFF" />
 
             <Button
@@ -107,7 +107,7 @@
         <ScrollView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="4dp">
+            android:padding="8dp">
 
             <LinearLayout
                 android:id="@+id/serverResultsContainer"
@@ -115,13 +115,13 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/rounded_background"
                 android:orientation="vertical"
-                android:padding="4dp">
+                android:padding="8dp">
 
                 <TextView
                     android:id="@+id/resultsByStaffTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_margin="16dp"
                     android:textColor="#000000"
                     android:textSize="16sp" />
 
