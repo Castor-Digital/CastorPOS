@@ -36,7 +36,7 @@ public class ResultsSidebarFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         loadResults();  // Load and display results
 
-        // Navigate to TotalsScreen
+        // Navigate to Totals Screen
         view.findViewById(R.id.buttonTotalsScreen).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -44,6 +44,17 @@ public class ResultsSidebarFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        /*
+        // Navigate to Wait List Screen
+        view.findViewById(R.id.buttonWaitList).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), WaitListActivity.class);
+                startActivity(intent);
+            }
+        });
+        */
         return view;
     }
 
