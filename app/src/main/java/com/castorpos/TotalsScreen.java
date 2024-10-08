@@ -4,10 +4,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,6 +23,7 @@ public class TotalsScreen extends AppCompatActivity {
     private TextView totalCreditRevenueTextView;
     private TextView totalCashRevenueTextView;
     private TextView resultsByStaffTextView;  // New TextView for results by server
+    private Button saveDataButton;
     private Button clearDataButton;
     private AppDatabase database;
     private ExecutorService executorService;
@@ -31,11 +38,13 @@ public class TotalsScreen extends AppCompatActivity {
         totalCreditRevenueTextView = findViewById(R.id.totalCCRevenueTextView);
         totalRevenueTextView = findViewById(R.id.totalRevenueTextView);
         resultsByStaffTextView = findViewById(R.id.resultsByStaffTextView);  // Initialize the new TextView
+        saveDataButton = findViewById(R.id.saveDataButton);
         clearDataButton = findViewById(R.id.clearDataButton);
 
         database = AppDatabase.getDatabase(getApplicationContext());
         executorService = Executors.newSingleThreadExecutor();
         loadTotals();
+        saveDataButton.setOnClickListener(v -> saveData());
         clearDataButton.setOnClickListener(v -> clearAllData());
     }
 
@@ -96,8 +105,49 @@ public class TotalsScreen extends AppCompatActivity {
         });
     }
 
+    private void saveData() {
+        String totalCashRevenue = totalCashRevenueTextView.getText().toString();
+        String totalCreditRevenue = totalCreditRevenueTextView.getText().toString();
+        String totalRevenue = totalRevenueTextView.getText().toString();
+        String resultsByServer = resultsByStaffTextView.getText().toString();
 
+        String currentDate = new SimpleDateFormat("MM-dd-yyyy", Locale.getDefault()).format(new Date());
 
+        StringBuilder reportContent = new StringBuilder();
+        reportContent.append("Summary for ").append(currentDate).append("\n\n");
+        reportContent.append(totalCashRevenue).append("\n");
+        reportContent.append(totalCreditRevenue).append("\n");
+        reportContent.append(totalRevenue).append("\n\n\n");
+
+        reportContent.append("Results by Server:\n");
+
+        String[] lines = resultsByServer.split("\n");
+        for (String line : lines) {
+            if (line.contains("|")) {
+                String[] parts = line.split("\\|");
+                String serverInfo = parts[0].trim();
+                String total = parts[1].trim().replace("Total: ", "($");
+                reportContent.append(serverInfo).append(" ").append(total).append(")\n");
+            } else {
+                reportContent.append(line).append("\n");
+            }
+        }
+
+        runOnUiThread(() -> {
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+            emailIntent.setType("text/plain");
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"trevforesta@gmail.com"});
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Summary for " + currentDate);
+            emailIntent.putExtra(Intent.EXTRA_TEXT, reportContent.toString());
+
+            try {
+                startActivity(Intent.createChooser(emailIntent, "Send email..."));
+                Toast.makeText(TotalsScreen.this, "Report Sent ✅", Toast.LENGTH_SHORT).show();
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(TotalsScreen.this, "No email clients installed.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     private void clearAllData() {
         executorService.execute(() -> {

@@ -47,27 +47,27 @@
             android:layout_weight="1"
             android:backgroundTint="#012741"
             android:text="Totals" />
+        <!--
+                <Button
+                    android:id="@+id/buttonWaitList"
+                    style="@style/CalculatorButton"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="#012741"
+                    android:text="WaitList" />
 
-        <Button
-            android:id="@+id/buttonWaitList"
-            style="@style/CalculatorButton"
-            android:textSize="16sp"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#012741"
-            android:text="WaitList" />
+                <Button
+                    android:id="@+id/buttonSettingsScreen"
+                    style="@style/CalculatorButton"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:backgroundTint="#012741"
+                    android:text="⚙️" />
+        -->
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/buttonSettingsScreen"
-            style="@style/CalculatorButton"
-            android:textSize="16sp"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:backgroundTint="#012741"
-            android:text="⚙️" />
-
-    </LinearLayout>
-
-</LinearLayout>
+        </LinearLayout>
