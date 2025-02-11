@@ -251,18 +251,18 @@
                     android:layout_rowWeight="1"
                     android:layout_columnWeight="1" />
 
+
                 <Button
-                    android:id="@+id/buttonEquals"
+                    android:id="@+id/buttonManagerMode"
                     style="@style/CalculatorButton"
-                    android:text="="
                     android:textSize="32sp"
                     android:layout_rowWeight="1"
-                    android:layout_columnWeight="1" />
-
+                    android:layout_columnWeight="1"
+                    android:text="✏️" />
                 <Button
                     android:id="@+id/buttonSave"
                     style="@style/CalculatorButton"
-                    android:text="Save ✅"
+                    android:text="Cash 💵"
                     android:textSize="24sp"
                     android:backgroundTint="#006400"
                     android:layout_rowWeight="1"
@@ -271,7 +271,7 @@
                 <Button
                     android:id="@+id/buttonCredit"
                     style="@style/CalculatorButton"
-                    android:text="CC"
+                    android:text="Card 💳"
                     android:textSize="24sp"
                     android:backgroundTint="#006400"
                     android:layout_rowWeight="1"
@@ -280,7 +280,7 @@
                 <Button
                     android:id="@+id/buttonCash"
                     style="@style/CalculatorButton"
-                    android:text="Cash"
+                    android:text="Change 💲"
                     android:textSize="24sp"
                     android:backgroundTint="#006400"
                     android:layout_rowWeight="1"

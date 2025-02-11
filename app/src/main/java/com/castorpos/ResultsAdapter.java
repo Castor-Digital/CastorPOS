@@ -19,6 +19,7 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
     private List<SavedResult> creditResults;
     private AppDatabase database;  // Add database reference for deletion
     private ExecutorService executorService;  // For background thread execution
+    private boolean managerMode = false;
 
     public ResultsAdapter(Context context, List<SavedResult> savedResults, List<SavedResult> creditResults, AppDatabase database, ExecutorService executorService) {
         this.context = context;
@@ -50,6 +51,7 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
         holder.savedServer.setText(result.getServerName());
         holder.savedCustomers.setText(String.valueOf(result.getCustomers()));
 
+        holder.deleteResultButton.setVisibility(managerMode ? View.VISIBLE : View.GONE);
         // Set up the delete button functionality
         holder.deleteResultButton.setOnClickListener(v -> {
             // Remove the result from the RecyclerView list
@@ -72,6 +74,11 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
     @Override
     public int getItemCount() {
         return savedResults.size() + creditResults.size();
+    }
+
+    public void setManagerMode(boolean enabled) {
+        this.managerMode = enabled;
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

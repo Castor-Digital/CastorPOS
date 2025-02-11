@@ -29,11 +29,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    packaging.resources {
+        excludes += ("/META-INF/*")
+    }
 }
 
 dependencies {
     implementation("androidx.core:core:1.7.0")
     implementation ("com.github.mik3y:usb-serial-for-android:3.7.3")
+<<<<<<< Updated upstream
+=======
+    implementation ("com.sun.mail:android-mail:1.6.7")
+    implementation ("com.sun.mail:android-activation:1.6.7")
+    implementation ("com.sendgrid:sendgrid-java:4.10.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.2")
+>>>>>>> Stashed changes
     implementation (libs.recyclerview.v121)
     implementation(libs.appcompat)
     implementation(libs.material)

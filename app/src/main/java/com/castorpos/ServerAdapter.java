@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
@@ -13,6 +15,8 @@ public class ServerAdapter extends RecyclerView.Adapter<ServerAdapter.ServerView
     private List<String> servers;
     private OnServerClickListener listener;
     private int selectedPosition = RecyclerView.NO_POSITION; // Track the selected position
+    private boolean managerMode = false;
+
 
     public ServerAdapter(List<String> servers, OnServerClickListener listener) {
         this.servers = servers;
@@ -62,6 +66,11 @@ public class ServerAdapter extends RecyclerView.Adapter<ServerAdapter.ServerView
     @Override
     public int getItemCount() {
         return servers.size();
+    }
+
+    public void setManagerMode(boolean enabled) {
+        this.managerMode = enabled;
+        notifyDataSetChanged(); // Refresh UI
     }
 
     public static class ServerViewHolder extends RecyclerView.ViewHolder {

@@ -25,6 +25,8 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
     private EditText customersInputEditText;
     private Button addButton;
     private String selectedServer;
+    private boolean managerMode = false;
+
 
     public ServerSidebarFragment() {
         servers = new ArrayList<>();
@@ -141,5 +143,15 @@ public class ServerSidebarFragment extends Fragment implements ServerAdapter.OnS
             // Allow editing for other server names
             customersInputEditText.setEnabled(true);
         }
+    }
+
+    public void setManagerMode(boolean enabled) {
+        managerMode = enabled;
+        adapter.setManagerMode(enabled);
+    }
+
+
+    public boolean isManagerMode() {
+        return managerMode;
     }
 }

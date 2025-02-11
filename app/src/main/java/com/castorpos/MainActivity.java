@@ -1,6 +1,5 @@
 package com.castorpos;
 
-import androidx.core.content.ContextCompat;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,30 +8,31 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
-import com.hoho.android.usbserial.driver.UsbSerialPort;
-import com.hoho.android.usbserial.driver.UsbSerialProber;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
+
+import com.hoho.android.usbserial.driver.UsbSerialPort;
+import com.hoho.android.usbserial.driver.UsbSerialProber;
+
+import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-
-import android.widget.Toast;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements ServerAdapter.OnServerClickListener {
     private ResultsSidebarFragment resultsSidebarFragment;
@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
     private int numberOfCustomers = 1;;
     private String selectedServer;
     private ExecutorService executorService;
+
+    private boolean isManagerMode = false;
+    private Button buttonManagerMode;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -184,12 +187,6 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
                 clearDisplay();
             }
         });
-        findViewById(R.id.buttonEquals).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                calculateResult();
-            }
-        });
         Button buttonSave = findViewById(R.id.buttonSave);
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -220,6 +217,16 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
         findViewById(R.id.buttonDoubleZero).setOnClickListener(v -> addDoubleZero());
         findViewById(R.id.buttonDiscount).setOnClickListener(v -> applyDiscount());
+
+        buttonManagerMode = findViewById(R.id.buttonManagerMode);
+        buttonManagerMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isManagerMode = !isManagerMode;
+                serverSidebarFragment.setManagerMode(isManagerMode);
+                resultsSidebarFragment.setManagerMode(isManagerMode);
+            }
+        });
 
     }
 
@@ -286,10 +293,10 @@ public class MainActivity extends AppCompatActivity implements ServerAdapter.OnS
 
             Toast.makeText(this, "Result saved: " + resultText, Toast.LENGTH_SHORT).show();
 
-            // If applicable, send a signal to open the cash drawer for cash payments
-            // if (!isCredit) {
-            //    sendSerialSignal();  // Send signal to open drawer for cash results
-            // }
+
+            if (!isCredit) {
+                sendSerialSignal();  // Send signal to open drawer for cash results
+            }
 
             // Reset the current operand and display
             operand1 = 0.00;

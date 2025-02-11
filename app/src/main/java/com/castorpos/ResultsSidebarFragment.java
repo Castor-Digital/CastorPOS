@@ -23,6 +23,8 @@ public class ResultsSidebarFragment extends Fragment {
     private List<SavedResult> creditResults = new ArrayList<>();
     private AppDatabase database;
     private ExecutorService executorService;
+    private boolean managerMode = false;
+
 
     @Nullable
     @Override
@@ -67,7 +69,14 @@ public class ResultsSidebarFragment extends Fragment {
                 adapter.notifyDataSetChanged();
             });
         });
+
+
+
     }
 
 
+    public void setManagerMode(boolean enabled) {
+        managerMode = enabled;
+        adapter.setManagerMode(enabled);
+    }
 }
